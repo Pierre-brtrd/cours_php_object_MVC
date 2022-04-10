@@ -1,0 +1,189 @@
+<?php
+
+namespace App\Models;
+
+use DateTime;
+
+/**
+ * Classe de Model de la table Poste
+ */
+class PosteModel extends Model
+{
+    /**
+     * @var int
+     */
+    protected $id;
+
+    /**
+     * @var string
+     */
+    protected $titre;
+
+    /**
+     * @var string
+     */
+    protected $description;
+
+    /**
+     * @var DateTime
+     */
+    protected $createdDAt;
+
+    /**
+     * @var int
+     */
+    protected $actif;
+
+    /**
+     * @var int
+     */
+    protected $userId;
+
+    public function __construct()
+    {
+        $this->table = 'poste';
+    }
+
+    /**
+     * Get undocumented variable
+     *
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set undocumented variable
+     *
+     * @param int $id  Undocumented variable
+     *
+     * @return self
+     */
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of titre
+     *
+     * @return string
+     */
+    public function getTitre(): string
+    {
+        return $this->titre;
+    }
+
+    /**
+     * Set the value of titre
+     *
+     * @public string $titre
+     * @return self
+     */
+    public function setTitre($titre): self
+    {
+        $this->titre = $titre;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of description
+     *
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set the value of description
+     *
+     * @param string $description
+     *
+     * @return self
+     */
+    public function setDescription(string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of createdDAt
+     *
+     * @return DateTime
+     */
+    public function getCreatedDAt(): DateTime
+    {
+        return $this->createdDAt;
+    }
+
+    /**
+     * Set the value of createdDAt
+     *
+     * @param DateTime $createdDAt
+     *
+     * @return self
+     */
+    public function setCreatedDAt(DateTime $createdDAt): self
+    {
+        $this->createdDAt = $createdDAt;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of actif
+     *
+     * @return int
+     */
+    public function getActif(): int
+    {
+        return $this->actif;
+    }
+
+    /**
+     * Set the value of actif
+     *
+     * @param bool $actif
+     *
+     * @return self
+     */
+    public function setActif(int $actif): self
+    {
+        $this->actif = $actif;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of user_id
+     *
+     * @return int
+     */
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    /**
+     * Set the value of user_id
+     *
+     * @param int $user_id
+     *
+     * @return self
+     */
+    public function setUserId(int $userId): self
+    {
+        $this->user_id = $userId;
+
+        return $this;
+    }
+}
