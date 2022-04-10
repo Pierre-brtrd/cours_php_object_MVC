@@ -39,6 +39,11 @@ class PosteModel extends Model
      */
     protected $userId;
 
+    /**
+     * @var string
+     */
+    protected $image;
+
     public function __construct()
     {
         $this->table = 'poste';
@@ -183,6 +188,30 @@ class PosteModel extends Model
     public function setUserId(int $userId): self
     {
         $this->user_id = $userId;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of image
+     *
+     * @return string
+     */
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set the value of image
+     *
+     * @param string $image
+     *
+     * @return self
+     */
+    public function setImage(string $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }

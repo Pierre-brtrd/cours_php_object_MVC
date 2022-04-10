@@ -108,18 +108,18 @@ class UserController extends Controller
         $form->startForm('POST', '', ['class' => 'form card p-3'])
             ->startGroup(['class' => 'form-group'])
             ->addLabelFor('nom', 'Votre nom :', ['class' => 'form-label'])
-            ->addInput('nom', 'nom', [
+            ->addInput('text', 'nom', [
                 'class' => 'form-control',
-                'id' => 'password',
+                'id' => 'nom',
                 'value' => $nom,
                 'required' => true
             ])
             ->endGroup()
             ->startGroup(['class' => 'form-group mt-2'])
             ->addLabelFor('prenom', 'Votre prénom :', ['class' => 'form-label'])
-            ->addInput('prenom', 'prenom', [
+            ->addInput('text', 'prenom', [
                 'class' => 'form-control',
-                'id' => 'password',
+                'id' => 'prenom',
                 'value' => $prenom,
                 'required' => true
             ])
@@ -145,6 +145,134 @@ class UserController extends Controller
             ->endForm();
 
         $this->render('users/register', 'base', ['registerForm' => $form->create()]);
+    }
+
+    public function edit(int $id)
+    {
+        // On vérifie si l'utilisateur est connecté
+        if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
+            // On vérifie que l'utilisateur existe dans la BDD
+            // On instancie le model
+            $userModel = new UserModel();
+
+            // On cherche l'utilisateur avec l'id
+            $user = $userModel->find($id);
+
+            // Si l'utilisateur n'existe pas, on redirige sur la liste des annonces
+            if (!$user) {
+                http_response_code(404);
+                $_SESSION['error'] = "L'utilisateur recherché n'existe pas";
+                header('Location: /admin/user');
+                exit;
+            }
+
+            // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
+            if ($user->id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+                $_SESSION['error'] = "Vous n'avez pas accès à cet utilisateur";
+                header('Location: /admin/user');
+                exit;
+            }
+
+            // On traire le formulaire
+            if (Form::validate($_POST, ['nom', 'prenom', 'email'])) {
+                // Le formulaire est valide
+                // On "nettoie" les champs
+                $email = strip_tags($_POST['email']);
+                $nom = strip_tags($_POST['nom']);
+                $prenom = strip_tags($_POST['prenom']);
+
+                // Chiffrement du mot de passe si modifier
+                if (isset($_POST['password']) && !empty($_POST['password'])) {
+                    $pass = password_hash($_POST['password'], PASSWORD_ARGON2I);
+                }
+
+                // On hydrate l'utilisateur
+                $userUpdate = new UserModel();
+
+                $userUpdate->setId($user->id)
+                    ->setEmail($email)
+                    ->setNom($nom)
+                    ->setPrenom($prenom);
+
+                isset($pass) ? $userUpdate->setPassword($pass) : '';
+                // On envoi l'utilisateur en BDD
+                $userUpdate->update();
+
+                // On redirige
+                $_SESSION['message'] = "Utilisateur modifié avec succès";
+
+                header('Location: /admin/user');
+                exit;
+            }
+
+            // On crée le formulaire
+            $form = new Form();
+
+            $form->startForm('POST', '', ['class' => 'form card p-3'])
+                ->startGroup(['class' => 'form-group'])
+                ->addLabelFor('nom', 'Votre nom :', ['class' => 'form-label'])
+                ->addInput('text', 'nom', [
+                    'class' => 'form-control',
+                    'id' => 'nom',
+                    'value' => $user->nom,
+                    'required' => true
+                ])
+                ->endGroup()
+                ->startGroup(['class' => 'form-group mt-2'])
+                ->addLabelFor('prenom', 'Votre prénom :', ['class' => 'form-label'])
+                ->addInput('text', 'prenom', [
+                    'class' => 'form-control',
+                    'id' => 'prenom',
+                    'value' => $user->prenom,
+                    'required' => true
+                ])
+                ->endGroup()
+                ->startGroup(['class' => 'form-group mt-2'])
+                ->addLabelFor('email', 'Email :', ['class' => 'form-label'])
+                ->addInput('email', 'email', [
+                    'class' => 'form-control',
+                    'id' => 'email',
+                    'value' => $user->email,
+                    'required' => true
+                ])
+                ->endGroup()
+                ->startGroup(['class' => 'form-group mt-2'])
+                ->addLabelFor('password', 'Mot de passe :', ['class' => 'form-label'])
+                ->addInput('password', 'password', [
+                    'class' => 'form-control',
+                    'id' => 'password'
+                ])
+                ->endGroup();
+
+            // Si Admin, on peut modifier le role
+            if (in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+                $form->startGroup(['class' => 'form-group mt-2'])
+                    ->addLabelFor('roles', 'Rôle :', ['class' => 'form-label'])
+                    ->addSelectInput(
+                        'roles',
+                        [
+                            'ROLE_USER' => 'Utilisateur',
+                            'ROLE_EDITOR' => 'Éditeur',
+                            'ROLE_ADMIN' => 'Administrateur'
+                        ],
+                        [
+                            'class' => 'form-control'
+                        ]
+                    )
+                    ->endGroup();
+            }
+
+            $form->addButton('Modifier', ['class' => 'btn btn-primary mt-4 mx-auto'])
+                ->endForm();
+
+            // On envoie à la vue
+            $this->render('users/modifier', 'base', ['form' => $form->create()]);
+        } else {
+            // L'utilisateur n'est pas connecté
+            $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";
+            header('Location: /user/login');
+            exit;
+        }
     }
 
     /**

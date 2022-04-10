@@ -12,7 +12,11 @@
         <div class="carousel-inner">
             <?php foreach ($postes as $key => $poste) : ?>
                 <div class="carousel-item <?= $key === array_key_first($postes) ? 'active' : '' ?>">
-                    <img src="https://fakeimg.pl/1200x400" class="d-block w-100" alt="...">
+                    <?php if ($poste->image) : ?>
+                        <img src="/uploads/postes/<?= $poste->image; ?>" class="img-carousel d-block" alt="<?= $poste->titre; ?>" loading="lazy" />
+                    <?php else : ?>
+                        <img src="https://fakeimg.pl/1200x600" class="img-carousel d-block w-100">
+                    <?php endif; ?>
                     <div class="carousel-caption d-none d-md-block">
                         <h2><?= $poste->titre; ?></h2>
                         <p><?= $poste->description; ?></p>

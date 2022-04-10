@@ -58,12 +58,36 @@ class PostesController extends Controller
                 $titre = strip_tags($_POST['titre']);
                 $description = strip_tags($_POST['description']);
 
+                // On vérifie s'il y a une image et qu'il n'a pas d'erreur
+                if ($_FILES['image'] && $_FILES['image']['error'] == 0) {
+                    // On vérifie la taille de l'image
+                    if ($_FILES['image']['size'] <= 1000000) {
+                        // On vérifie l'extension de l'image
+                        $infoFile = pathinfo($_FILES['image']['name']);
+                        $extension = $infoFile['extension'];
+                        $extensionAllowed = ['jpg', 'jpeg', 'png', 'gif'];
+
+                        if (in_array($extension, $extensionAllowed)) {
+                            // On remplace les espaces et on enregistre le fichier dans le dossier uploads
+                            $file = str_replace(" ", "-", $_FILES['image']['name']);
+
+                            move_uploaded_file(
+                                str_replace(" ", ",", $_FILES['image']['tmp_name']),
+                                '/app/public/uploads/postes/' . $file
+                            );
+
+                            $image = $file;
+                        }
+                    }
+                }
+
                 // On instancie le model
                 $poste = new PosteModel();
 
                 // On hydrate
                 $poste->setTitre($titre)
                     ->setDescription($description)
+                    ->setImage($image ? $image : '')
                     ->setUserId($_SESSION['user']['id']);
 
                 // On enregistre
@@ -72,7 +96,7 @@ class PostesController extends Controller
                 // On redirige
                 $_SESSION['message'] = "Poste enrgistré avec succès";
 
-                header('Location: /postes');
+                header('Location: /admin/postes');
                 exit();
             } else {
                 // Le formulaire est incomplet
@@ -159,6 +183,29 @@ class PostesController extends Controller
                 $titre = strip_tags($_POST['titre']);
                 $description = strip_tags($_POST['description']);
 
+                // On vérifie s'il y a une image et qu'il n'a pas d'erreur
+                if ($_FILES['image'] && $_FILES['image']['error'] == 0) {
+                    // On vérifie la taille de l'image
+                    if ($_FILES['image']['size'] <= 1000000) {
+                        // On vérifie l'extension de l'image
+                        $infoFile = pathinfo($_FILES['image']['name']);
+                        $extension = $infoFile['extension'];
+                        $extensionAllowed = ['jpg', 'jpeg', 'png', 'gif'];
+
+                        if (in_array($extension, $extensionAllowed)) {
+                            // On remplace les espaces et on enregistre le fichier dans le dossier uploads
+                            $file = str_replace(" ", "-", $_FILES['image']['name']);
+
+                            move_uploaded_file(
+                                str_replace(" ", ",", $_FILES['image']['tmp_name']),
+                                '/app/public/uploads/postes/' . $file
+                            );
+
+                            $image = $file;
+                        }
+                    }
+                }
+
                 // On instancie le model
                 $posteUpdate = new PosteModel();
 
@@ -167,13 +214,15 @@ class PostesController extends Controller
                     ->setTitre($titre)
                     ->setDescription($description);
 
+                isset($image) ? $posteUpdate->setImage($image) : '';
+
                 // On enregistre
                 $posteUpdate->update();
 
                 // On redirige
                 $_SESSION['message'] = "Poste modifié avec succès";
 
-                header('Location: /postes');
+                header('Location: /admin/postes');
                 exit();
             } else {
                 $_SESSION['error'] = !empty($_POST) ? "Le formulaire est incomplet" : '';

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\PosteModel;
+use App\Models\UserModel;
 
 class AdminController extends Controller
 {
@@ -43,8 +44,6 @@ class AdminController extends Controller
             $_SESSION['message'] = "Poste supprimé avec succés";
 
             header('Location: ' . $_SERVER['HTTP_REFERER']);
-        } else {
-            echo 'Pas bon';
         }
     }
 
@@ -76,6 +75,42 @@ class AdminController extends Controller
 
                 $poste->update();
             }
+        }
+    }
+
+    /**
+     * Affiche la page d'admin des utilisateurs
+     *
+     * @return void
+     */
+    public function user()
+    {
+        if ($this->isAdmin()) {
+            // On instancie le model User
+            $userModel = new UserModel();
+
+            $users = $userModel->findAll();
+
+            // On appelle la vue avec la fonction render en lui passant les données
+            $this->render('admin/users', 'admin', ['users' => $users]);
+        }
+    }
+
+    /**
+     * Supprime un user
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function deleteUser(int $id)
+    {
+        if ($this->isAdmin()) {
+            $user = new UserModel();
+            $user->delete($id);
+
+            $_SESSION['message'] = "Utilisateur supprimé avec succés";
+
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
         }
     }
 
