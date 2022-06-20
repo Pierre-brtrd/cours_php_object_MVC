@@ -6,9 +6,8 @@ window.onload = () => {
         btn.addEventListener('click', () => {
             let xmlHttp = new XMLHttpRequest;
             let card = btn.closest('.card');
-            console.log(card);
-
-            xmlHttp.open('GET', '/admin/activePoste/' + btn.dataset.id);
+            
+            xmlHttp.open('GET', '/admin/actifPoste/' + btn.dataset.id);
 
             xmlHttp.onload = () => {
                 if(xmlHttp.readyState === xmlHttp.DONE) {
