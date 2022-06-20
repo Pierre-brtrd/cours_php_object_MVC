@@ -71,11 +71,15 @@ class Main
                     (isset($params[0])) ? call_user_func_array([$controller, $action], $params) : $controller->$action();
                 } else {
                     http_response_code(404);
-                    echo 'Page not found';
+                    $controller = new MainController();
+
+                    $controller->error(404);
                 }
             } else {
                 http_response_code(404);
-                echo 'Page not found';
+                $controller = new MainController();
+
+                $controller->error(404);
             }
         } else {
             // On a pas de parametres, donc on instancie le controller par défaut

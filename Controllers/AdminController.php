@@ -75,6 +75,8 @@ class AdminController extends Controller
 
                 $poste->update();
             }
+
+            echo $poste->getActif() ? 'border-success' : 'border-danger';
         }
     }
 

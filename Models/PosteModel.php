@@ -50,6 +50,16 @@ class PosteModel extends Model
     }
 
     /**
+     * Cherche les postes avec les auteurs
+     *
+     * @return void
+     */
+    public function findActiveWithAuthor(bool $actif)
+    {
+        return $this->runQuery("SELECT * FROM $this->table INNER JOIN user ON $this->table.user_id = user.id WHERE actif = ?", [$actif])->fetchAll();
+    }
+
+    /**
      * Get undocumented variable
      *
      * @return int

@@ -1,14 +1,25 @@
+// Script de switch visibilté en AJAX
 window.onload = () => {
-    const btnEnabled = document.querySelectorAll(".form-check-input.enabled");
+    let btns = document.querySelectorAll('.form-check-input.enabled');
 
-    for (let btn of btnEnabled) {
-        btn.addEventListener("click", activer);
-    }
-}
+    btns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            let xmlHttp = new XMLHttpRequest;
+            let card = btn.closest('.card');
+            console.log(card);
 
-function activer() {
-    let xmlHttp = new XMLHttpRequest();
+            xmlHttp.open('GET', '/admin/activePoste/' + btn.dataset.id);
 
-    xmlHttp.open("GET", '/admin/actifPoste/' + this.dataset.id);
-    xmlHttp.send();
+            xmlHttp.onload = () => {
+                if(xmlHttp.readyState === xmlHttp.DONE) {
+                    if(xmlHttp.status === 200) {
+                        card.classList.remove((xmlHttp.response === 'border-success') ? 'border-danger' : 'border-success');
+                        card.classList.add((xmlHttp.response === 'border-success') ? 'border-success' : 'border-danger');
+                    }
+                }
+            }
+            
+            xmlHttp.send();
+        })
+    })
 }

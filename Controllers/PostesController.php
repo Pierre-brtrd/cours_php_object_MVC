@@ -4,24 +4,26 @@ namespace App\Controllers;
 
 use App\Core\Form;
 use App\Models\PosteModel;
+use App\Models\UserModel;
 
 class PostesController extends Controller
 {
     /**
-     * Affiche la liste des postes
+     * Affiche la page de liste poste actif
      *
      * @return void
      */
     public function index()
     {
-        // On instancie le model correspondant à la table postes
+        // On insrtancie le Model Poste
         $posteModel = new PosteModel();
 
-        // On va chercher toutes les annonces
-        $postes = $posteModel->findBy(['actif' => 1]);
+        // On va chercher les postes
+        $postes = $posteModel->findActiveWithAuthor(true);
 
-        // On appelle la vue avec la fonction render en lui passant les données
-        $this->render('postes/index', 'base', ['postes' => $postes]);
+        $this->render('Postes/index', 'base', [
+            'postes' => $postes
+        ]);
     }
 
     /**
@@ -39,6 +41,26 @@ class PostesController extends Controller
         $poste = $posteModel->find($id);
 
         $this->render('postes/show', 'base', ['poste' => $poste]);
+    }
+
+    /**
+     * Affiche les postes par auteur
+     *
+     * @param integer $id
+     * @return void
+     */
+    public function auteur(int $id)
+    {
+        $posteModel = new PosteModel();
+        $postes = $posteModel->findBy(['user_id' => $id]);
+
+        $userModel = new UserModel();
+        $auteur = $userModel->find($id);
+
+        $this->render('Postes/auteur', 'base', [
+            'postes' => $postes,
+            'auteur' => $auteur
+        ]);
     }
 
     /**

@@ -20,4 +20,9 @@ class MainController extends Controller
 
         $this->render('main/index', 'base', ['postes' => $postes]);
     }
+
+    public function error(int $statusCode)
+    {
+        $this->render('error/error', 'base', ['code' => $statusCode]);
+    }
 }
