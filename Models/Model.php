@@ -151,7 +151,7 @@ class Model extends Db
      * Création d'objet par hydratation d'un tableau associatif
      *
      * @param $donnees
-     * @return self
+     * @return Model
      */
     public function hydrate($donnees)
     {
