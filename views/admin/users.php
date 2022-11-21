@@ -19,8 +19,18 @@
                         <td><?= $user->email; ?></td>
                         <td><?= $user->roles; ?></td>
                         <td>
-                            <a href="/user/edit/<?= $user->id; ?>" class="btn btn-warning">Modifier</a>
-                            <a href="/admin/deleteUser/<?= $user->id; ?>" class="btn btn-danger">Supprimer</a>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <a href="/user/edit/<?= $user->id; ?>" class="btn btn-warning">Modifier</a>
+                                </div>
+                                <div class="col-md-6">
+                                    <form action="/admin/deleteUser" method="POST" onsubmit="return confirm('Êtes-vous vraiment sûr de vouloir supprimer ce poste ?')">
+                                        <input type="hidden" name="token" value="<?= $token; ?>">
+                                        <input type="hidden" name="id" value="<?= $user->id; ?>">
+                                        <button type="submit" class="btn btn-danger">Supprimer</a>
+                                    </form>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>

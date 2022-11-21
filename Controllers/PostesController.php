@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Form;
 use App\Models\PosteModel;
 use App\Models\UserModel;
+use DateTime;
 
 class PostesController extends Controller
 {
@@ -19,7 +20,7 @@ class PostesController extends Controller
         $posteModel = new PosteModel();
 
         // On va chercher les postes
-        $postes = $posteModel->findActiveWithAuthor(true);
+        $postes = $posteModel->findActiveWithAuthor();
 
         $this->render('Postes/index', 'base', [
             'postes' => $postes
@@ -74,7 +75,10 @@ class PostesController extends Controller
         if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
             // L'utilisateur est connecté
             // On vérifie si le formulaire est complet
-            if (Form::validate($_POST, ['titre', 'description'])) {
+            if (
+                Form::validate($_POST, ['titre', 'description']) &&
+                hash_equals($_POST['token'], $_SESSION['token'])
+            ) {
                 // Le formulaire est complet
                 // On se protège contre les failles XSS (injection de script en BDD via le form)
                 $titre = strip_tags($_POST['titre']);
@@ -116,7 +120,7 @@ class PostesController extends Controller
                 $poste->create();
 
                 // On redirige
-                $_SESSION['message'] = "Poste enrgistré avec succès";
+                $_SESSION['message'] = "Poste enregistré avec succès";
 
                 header('Location: /admin/postes');
                 exit();
@@ -154,6 +158,9 @@ class PostesController extends Controller
                     'class' => 'form-control',
                 ])
                 ->endGroup()
+                ->addInput('hidden', 'token', [
+                    'value' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+                ])
                 ->addButton('Ajouter', ['class' => 'btn btn-primary mt-4 mx-auto'])
                 ->endForm();
 
@@ -199,7 +206,10 @@ class PostesController extends Controller
             }
 
             // On traire le formulaire
-            if (Form::validate($_POST, ['titre', 'description'])) {
+            if (
+                Form::validate($_POST, ['titre', 'description'])
+                && hash_equals($_POST['token'], $_SESSION['token'])
+            ) {
                 // Le formulaire est complet
                 // On se protège contre les failles XSS (injection de script en BDD via le form)
                 $titre = strip_tags($_POST['titre']);
@@ -216,7 +226,15 @@ class PostesController extends Controller
 
                         if (in_array($extension, $extensionAllowed)) {
                             // On remplace les espaces et on enregistre le fichier dans le dossier uploads
-                            $file = str_replace(" ", "-", $_FILES['image']['name']);
+                            $file = str_replace(' ', '-', $infoFile['filename'])
+                                . (new DateTime())->format('Y-m-d_H:i:s') . '.' .
+                                $infoFile['extension'];
+                            if ($poste->image) {
+                                $imagePath = "/app/public/uploads/postes/$poste->image";
+                                if (file_exists($imagePath)) {
+                                    unlink($imagePath);
+                                }
+                            }
 
                             move_uploaded_file(
                                 str_replace(" ", ",", $_FILES['image']['tmp_name']),
@@ -272,14 +290,24 @@ class PostesController extends Controller
                     'class' => 'form-control',
                     'required' => true
                 ])
-                ->endGroup()
-                ->startGroup(['class' => 'form-group mt-3'])
+                ->endGroup();
+
+            if ($poste->image) {
+                $form->startGroup(['class' => 'form-group form-img mt-3'])
+                    ->addImage("/uploads/postes/$poste->image")
+                    ->endGroup();
+            }
+
+            $form->startGroup(['class' => 'form-group mt-3'])
                 ->addLabelFor('image', 'Image du poste :', ['class' => 'form-label'])
                 ->addInput('file', 'image', [
                     'id' => 'image',
                     'class' => 'form-control',
                 ])
                 ->endGroup()
+                ->addInput('hidden', 'token', [
+                    'value' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+                ])
                 ->addButton('Modifier', ['class' => 'btn btn-primary mt-4 mx-auto'])
                 ->endForm();
 

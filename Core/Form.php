@@ -199,20 +199,39 @@ class Form
      */
     public function addSelectInput(string $nom, array $options, array $attributs = []): self
     {
-
+        // var_dump($options);
+        // die();
         // On crée la balise
         $this->formCode .= "<select name='$nom'";
 
         // On ajoute les attributs
         $this->formCode .= $attributs ? $this->addAttributs($attributs) . '>' : '>';
 
-        // On ajoute les options
-        foreach ($options as $valeur => $text) {
-            $this->formCode .= "<option value=\"$valeur\">$text</option>";
+        /** 
+         * On ajoute les options
+         * 
+         * @var array $attr 
+         */
+        foreach ($options as $text => $attr) {
+            $this->formCode .= "<option";
+            foreach ($attr as $name => $value) {
+                if ($value) {
+                    $this->formCode .= " $name=\"$value\"";
+                }
+            }
+
+            $this->formCode .= ">$text</option>";
         }
 
         // On ferme la balise select
         $this->formCode .= "</select>";
+
+        return $this;
+    }
+
+    public function addImage(string $imageSrc): self
+    {
+        $this->formCode .= "<img src=\"$imageSrc\"/>";
 
         return $this;
     }

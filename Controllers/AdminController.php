@@ -25,25 +25,33 @@ class AdminController extends Controller
             $postes = $posteModel->findAll();
 
             // On appelle la vue avec la fonction render en lui passant les données
-            $this->render('admin/postes', 'admin', ['postes' => $postes]);
+            $this->render('admin/postes', 'admin', [
+                'postes' => $postes,
+                'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+            ]);
         }
     }
 
     /**
      * Supprime un poste
      *
-     * @param integer $id
+     *
      * @return void
      */
-    public function deletePoste(int $id)
+    public function deletePoste()
     {
         if ($this->isAdmin()) {
             $poste = new PosteModel();
-            $poste->delete($id);
 
-            $_SESSION['message'] = "Poste supprimé avec succés";
+            if (hash_equals($_POST['token'], $_SESSION['token']) && !empty($_POST['id'])) {
+                $poste->delete($_POST['id']);
+                $_SESSION['message'] = "Poste supprimé avec succés";
+            } else {
+                $_SESSION['error'] = "Une erreur est survenue";
+            }
 
             header('Location: ' . $_SERVER['HTTP_REFERER']);
+            exit();
         }
     }
 
@@ -70,6 +78,8 @@ class AdminController extends Controller
                  *  }
                  * 
                  *  Utilisation du ternaire pour simplifier le code sur 1 ligne :
+                 * 
+                 * @var PosteModel $poste
                  */
                 $poste->setActif($poste->getActif() ? 0 : 1);
 
@@ -94,25 +104,31 @@ class AdminController extends Controller
             $users = $userModel->findAll();
 
             // On appelle la vue avec la fonction render en lui passant les données
-            $this->render('admin/users', 'admin', ['users' => $users]);
+            $this->render('admin/users', 'admin', [
+                'users' => $users,
+                'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+            ]);
         }
     }
 
     /**
      * Supprime un user
      *
-     * @param integer $id
      * @return void
      */
-    public function deleteUser(int $id)
+    public function deleteUser()
     {
         if ($this->isAdmin()) {
-            $user = new UserModel();
-            $user->delete($id);
-
-            $_SESSION['message'] = "Utilisateur supprimé avec succés";
+            if (hash_equals($_POST['token'], $_SESSION['token']) && !empty($_POST['id'])) {
+                $user = new UserModel();
+                $user->delete($_POST['id']);
+                $_SESSION['message'] = "Utilisateur supprimé avec succés";
+            } else {
+                $_SESSION['error'] = "Une erreur est survenue";
+            }
 
             header('Location: ' . $_SERVER['HTTP_REFERER']);
+            exit();
         }
     }
 

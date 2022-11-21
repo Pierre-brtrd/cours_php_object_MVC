@@ -63,7 +63,7 @@ class UserModel extends Model
             'prenom' => $this->prenom,
             'nom' => $this->nom,
             'email' => $this->email,
-            'roles' => $this->roles,
+            'roles' => json_decode((string) $this->roles),
         ];
     }
 
@@ -204,13 +204,13 @@ class UserModel extends Model
     /**
      * Set the value of roles
      *
-     * @param mixed $roles
+     * @param array $roles
      *
      * @return self
      */
-    public function setRoles($roles): self
+    public function setRoles(array $roles): self
     {
-        $this->roles = json_decode($roles);
+        $this->roles = json_encode($roles);
 
         return $this;
     }

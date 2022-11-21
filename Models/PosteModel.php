@@ -54,9 +54,9 @@ class PosteModel extends Model
      *
      * @return void
      */
-    public function findActiveWithAuthor(bool $actif)
+    public function findActiveWithAuthor()
     {
-        return $this->runQuery("SELECT * FROM $this->table INNER JOIN user ON $this->table.user_id = user.id WHERE actif = ?", [$actif])->fetchAll();
+        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.user_id = u.id WHERE actif = ?", [true])->fetchAll();
     }
 
     /**

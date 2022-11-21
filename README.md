@@ -14,7 +14,7 @@ Pour le cours, nous allons mettre en place une petite application web qui va res
 
 ## MVC définition
 
-MVC est un acronyme pour définir __M__odel __V__ue __C__ontroller, ce design pattern est destiner à scinder votre développement en 3 grands pôle de fichiers/dossiers :
+MVC est un acronyme pour définir **M**odel **V**ue **C**ontroller, ce design pattern est destiner à scinder votre développement en 3 grands pôle de fichiers/dossiers :
 
 - __Les models__ : 
   - Dans ces fichiers, vous mettrez vos objets (classes), ce sont 

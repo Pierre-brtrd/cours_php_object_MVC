@@ -29,10 +29,18 @@ class UserController extends Controller
             }
 
             // L'utilisateur existe
+            $userArray->roles = json_decode($userArray->roles);
             $user = $userModel->hydrate($userArray);
 
-            // On vérifie si le password est correct
-            if (password_verify($_POST['password'], $user->getPassword())) {
+            /**
+             * On vérifie si le password est correct
+             * 
+             * @var UserModel $user
+             */
+            if (
+                password_verify($_POST['password'], $user->getPassword())
+                && hash_equals($_POST['token'], $_SESSION['token'])
+            ) {
                 // Le mot de passe est bon
                 // On crée la session
                 $user->setSession();
@@ -63,6 +71,9 @@ class UserController extends Controller
                 'required' => true
             ])
             ->endGroup()
+            ->addInput('hidden', 'token', [
+                'value' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+            ])
             ->addButton('Me connecter', ['class' => 'btn btn-primary mt-4 mx-auto'])
             ->endForm();
 
@@ -77,7 +88,10 @@ class UserController extends Controller
     public function register()
     {
         // Vérification si le formulaire est valide
-        if (Form::validate($_POST, ['nom', 'prenom', 'email', 'password'])) {
+        if (
+            Form::validate($_POST, ['nom', 'prenom', 'email', 'password'])
+            && hash_equals($_POST['token'], $_SESSION['token'])
+        ) {
             // Le formulaire est valide
             // On "nettoie" les champs
             $email = strip_tags($_POST['email']);
@@ -141,6 +155,9 @@ class UserController extends Controller
                 'required' => true
             ])
             ->endGroup()
+            ->addInput('hidden', 'token', [
+                'value' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+            ])
             ->addButton('Inscription', ['class' => 'btn btn-primary mt-4 mx-auto'])
             ->endForm();
 
@@ -174,7 +191,10 @@ class UserController extends Controller
             }
 
             // On traire le formulaire
-            if (Form::validate($_POST, ['nom', 'prenom', 'email'])) {
+            if (
+                Form::validate($_POST, ['email'])
+                && hash_equals($_POST['token'], $_SESSION['token'])
+            ) {
                 // Le formulaire est valide
                 // On "nettoie" les champs
                 $email = strip_tags($_POST['email']);
@@ -186,6 +206,11 @@ class UserController extends Controller
                     $pass = password_hash($_POST['password'], PASSWORD_ARGON2I);
                 }
 
+                // Récupération des roles si existe
+                if (isset($_POST['roles']) && !empty($_POST['roles'])) {
+                    $roles[] = $_POST['roles'];
+                }
+
                 // On hydrate l'utilisateur
                 $userUpdate = new UserModel();
 
@@ -194,7 +219,9 @@ class UserController extends Controller
                     ->setNom($nom)
                     ->setPrenom($prenom);
 
-                isset($pass) ? $userUpdate->setPassword($pass) : '';
+                isset($pass) ? $userUpdate->setPassword($pass) : null;
+                isset($roles) ? $userUpdate->setRoles($roles) : null;
+
                 // On envoi l'utilisateur en BDD
                 $userUpdate->update();
 
@@ -251,9 +278,18 @@ class UserController extends Controller
                     ->addSelectInput(
                         'roles',
                         [
-                            'ROLE_USER' => 'Utilisateur',
-                            'ROLE_EDITOR' => 'Éditeur',
-                            'ROLE_ADMIN' => 'Administrateur'
+                            'Utilisateur' => [
+                                'value' => 'ROLE_USER',
+                                'selected' => in_array('ROLE_USER', json_decode($user->roles)) ? true : null,
+                            ],
+                            'Éditeur' => [
+                                'value' => 'ROLE_EDITOR',
+                                'selected' => in_array('ROLE_EDITOR', json_decode($user->roles)) ? true : null,
+                            ],
+                            'Administrateur' => [
+                                'value' => 'ROLE_ADMIN',
+                                'selected' => in_array('ROLE_ADMIN', json_decode($user->roles)) ? true : null,
+                            ],
                         ],
                         [
                             'class' => 'form-control'
@@ -262,7 +298,11 @@ class UserController extends Controller
                     ->endGroup();
             }
 
-            $form->addButton('Modifier', ['class' => 'btn btn-primary mt-4 mx-auto'])
+            $form
+                ->addInput('hidden', 'token', [
+                    'value' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+                ])
+                ->addButton('Modifier', ['class' => 'btn btn-primary mt-4 mx-auto'])
                 ->endForm();
 
             // On envoie à la vue

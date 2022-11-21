@@ -16,8 +16,18 @@
                                 <input class="form-check-input enabled" type="checkbox" role="switch" id="flexSwitchCheckDefault<?= $poste->id; ?>" <?= $poste->actif ? 'checked' : '' ?> data-id="<?= $poste->id; ?>">
                                 <label class="form-check-label" for="flexSwitchCheckDefault<?= $poste->id; ?>">Actif</label>
                             </div>
-                            <a href="/postes/modifier/<?= $poste->id; ?>" class="btn btn-warning">Modifier</a>
-                            <a href="/admin/deletePoste/<?= $poste->id; ?>" class="btn btn-danger">Supprimer</a>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <a href="/postes/modifier/<?= $poste->id; ?>" class="btn btn-warning">Modifier</a>
+                                </div>
+                                <div class="col-md-6">
+                                    <form action="/admin/deletePoste" method="POST" onsubmit="return confirm('Êtes-vous vraiment sûr de vouloir supprimer ce poste ?')">
+                                        <input type="hidden" name="token" value="<?= $token; ?>">
+                                        <input type="hidden" name="id" value="<?= $poste->id; ?>">
+                                        <button type="submit" class="btn btn-danger">Supprimer</a>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
