@@ -28,11 +28,11 @@
                             <a class="nav-link" href="/user/profil">Profil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger" href="/user/logout">Déconnexion</a>
+                            <a class="nav-link btn btn-danger" href="/logout">Déconnexion</a>
                         </li>
                     <?php else : ?>
                         <li class="nav-item">
-                            <a class="btn btn-outline-light" href="/user/login">Connexion</a>
+                            <a class="btn btn-outline-light" href="/login">Connexion</a>
                         </li>
                     <?php endif; ?>
                 </ul>

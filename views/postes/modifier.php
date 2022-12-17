@@ -12,5 +12,6 @@
                 <?= $form; ?>
             </div>
         </div>
+        <a href="/admin/postes" class="btn btn-primary mb-4">Retour à la liste</a>
     </div>
 </section>

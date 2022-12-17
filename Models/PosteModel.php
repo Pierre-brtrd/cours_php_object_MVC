@@ -12,37 +12,37 @@ class PosteModel extends Model
     /**
      * @var int
      */
-    protected $id;
+    protected int $id;
 
     /**
      * @var string
      */
-    protected $titre;
+    protected string $titre;
 
     /**
      * @var string
      */
-    protected $description;
+    protected string $description;
 
     /**
      * @var DateTime
      */
-    protected $createdDAt;
+    protected Datetime $createdDAt;
+
+    /**
+     * @var bool
+     */
+    protected bool $actif;
 
     /**
      * @var int
      */
-    protected $actif;
+    protected int $userId;
 
     /**
-     * @var int
+     * @var string|null
      */
-    protected $userId;
-
-    /**
-     * @var string
-     */
-    protected $image;
+    protected ?string $image;
 
     public function __construct()
     {
@@ -52,11 +52,16 @@ class PosteModel extends Model
     /**
      * Cherche les postes avec les auteurs
      *
-     * @return void
+     * @return array
      */
-    public function findActiveWithAuthor()
+    public function findActiveWithAuthor(): array
     {
         return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.user_id = u.id WHERE actif = ?", [true])->fetchAll();
+    }
+
+    public function findActiveWithLimit(int $max): array
+    {
+        return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll();
     }
 
     /**
@@ -157,9 +162,9 @@ class PosteModel extends Model
     /**
      * Get the value of actif
      *
-     * @return int
+     * @return bool
      */
-    public function getActif(): int
+    public function getActif(): bool
     {
         return $this->actif;
     }
@@ -171,7 +176,7 @@ class PosteModel extends Model
      *
      * @return self
      */
-    public function setActif(int $actif): self
+    public function setActif(bool $actif): self
     {
         $this->actif = $actif;
 
@@ -207,7 +212,7 @@ class PosteModel extends Model
      *
      * @return string
      */
-    public function getImage(): string
+    public function getImage(): ?string
     {
         return $this->image;
     }

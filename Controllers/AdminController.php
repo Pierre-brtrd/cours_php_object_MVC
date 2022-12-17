@@ -25,7 +25,7 @@ class AdminController extends Controller
             $postes = $posteModel->findAll();
 
             // On appelle la vue avec la fonction render en lui passant les données
-            $this->render('admin/postes', 'admin', [
+            $this->render('admin/Postes/index', 'admin', [
                 'postes' => $postes,
                 'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
             ]);

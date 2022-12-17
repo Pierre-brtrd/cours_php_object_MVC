@@ -50,7 +50,7 @@ class Main
         // On sépare les parametres dans un tableau
         $params = explode('/', $_GET['p']);
 
-        if ($params[0] != '') {
+        if ($params[0] != '' && $params[0] != 'login' && $params[0] != 'logout') {
             // On a au moins 1 parametre
             // On vérifie que le fichier du controlleur demandé existe
             $file = '/app/Controllers/' . ucfirst($params[0]) . 'Controller.php';
@@ -84,6 +84,11 @@ class Main
         } else {
             // On a pas de parametres, donc on instancie le controller par défaut
             $controller = new MainController();
+
+            if ($params[0] != '') {
+                $action = array_shift($params);
+                $controller->$action();
+            }
 
             // On appelle la methode index
             $controller->index();

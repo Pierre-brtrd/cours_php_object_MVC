@@ -11,7 +11,7 @@ use PDOException;
 class Db extends PDO
 {
     // Instance unique de la class
-    private static $instance;
+    private static Db $instance;
 
     // Information de connexion en BDD
     private const DBHOST = 'db_php_POO_MVC';
@@ -34,6 +34,7 @@ class Db extends PDO
             $this->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES utf8');
             $this->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
         } catch (PDOException $e) {
             die($e->getMessage());
         }

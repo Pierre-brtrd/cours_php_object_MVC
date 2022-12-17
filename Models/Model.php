@@ -3,21 +3,30 @@
 namespace App\Models;
 
 use App\Core\Db;
+use PDOStatement;
 
 class Model extends Db
 {
-    // Table de la base donnée
-    protected $table;
+    /**
+     * Table de la base donnée
+     *
+     * @var string
+     */
+    protected string $table;
 
-    // Instance de Db
-    private $db;
+    /**
+     * Instance de Db
+     *
+     * @var Db
+     */
+    private Db $db;
 
     /**
      * Récupère tous les entrées d'une table
      *
      * @return array
      */
-    public function findAll()
+    public function findAll(): array
     {
         $query = $this->runQuery('SELECT * FROM ' . $this->table);
         return $query->fetchAll();
@@ -29,7 +38,7 @@ class Model extends Db
      * @param array $args
      * @return array
      */
-    public function findBy(array $args)
+    public function findBy(array $args): array
     {
         $champs = [];
         $valeurs = [];
@@ -53,7 +62,7 @@ class Model extends Db
      * @param integer $id
      * @return mixed
      */
-    public function find(int $id)
+    public function find(int $id): mixed
     {
         return $this->runQuery("SELECT * FROM $this->table WHERE id = $id")->fetch();
     }
@@ -63,7 +72,7 @@ class Model extends Db
      *
      * @return bool
      */
-    public function create()
+    public function create(): bool
     {
         $champs = [];
         $inter = [];
@@ -91,7 +100,7 @@ class Model extends Db
      *
      * @return bool
      */
-    public function update()
+    public function update(): bool
     {
         $champs = [];
         $valeurs = [];
@@ -118,7 +127,7 @@ class Model extends Db
      * @param integer $id
      * @return bool
      */
-    public function delete(int $id)
+    public function delete(int $id): bool
     {
         return $this->runQuery("DELETE FROM $this->table WHERE id = ?", [$id]);
     }
@@ -130,7 +139,7 @@ class Model extends Db
      * @param array|null $attributs
      * @return PDOStatement|false
      */
-    public function runQuery(string $sql, array $attributs = null)
+    public function runQuery(string $sql, array $attributs = null): ?PDOStatement
     {
         // On récupère l'instance de DB
         $this->db = Db::getInstance();
@@ -153,7 +162,7 @@ class Model extends Db
      * @param $donnees
      * @return Model
      */
-    public function hydrate($donnees)
+    public function hydrate($donnees): self
     {
         foreach ($donnees as $key => $value) {
             // On récupère le nom du setter correspondant à la clé (key)

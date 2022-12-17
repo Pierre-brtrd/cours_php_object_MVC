@@ -1,3 +1,5 @@
+@import "./variables.css";
+
 .carousel {
     height: 80vh;
 }
@@ -19,4 +21,47 @@
 .form-img img {
     width: 100%;
     border-radius: 8px;
+}
+
+/************** Banner ***************/
+.banner-hero {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.banner-header {
+    font-size: 36px;
+    text-align: center;
+    padding: 0.5em 1em;
+    border-radius: var(--bs-border-radius);
+    background: rgba(var(--bs-primary-rgb), 0.6);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.banner-header h1 {
+    color: whitesmoke;
+}
+
+
+/************ Liste card *************/
+.list-card {
+    margin-bottom: 2em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2em;
+}
+
+.list-card .card {
+    width: 30%;
+}
+
+.list-card .card img {
+    height: 200px;
+    object-fit: cover;
 }

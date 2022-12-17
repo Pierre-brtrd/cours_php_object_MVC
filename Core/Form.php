@@ -4,14 +4,14 @@ namespace App\Core;
 
 class Form
 {
-    private $formCode = '';
+    private string $formCode = '';
 
     /**
      * Génère le formulaire HTML
      *
      * @return string
      */
-    public function create()
+    public function create(): string
     {
         return $this->formCode;
     }
@@ -23,7 +23,7 @@ class Form
      * @param array $champs Tableau listant les champs obligatoires
      * @return bool
      */
-    public static function validate(array $form, array $champs)
+    public static function validate(array $form, array $champs): bool
     {
         // On parcours les champs
         foreach ($champs as $champ) {
@@ -33,6 +33,7 @@ class Form
                 return false;
             }
         }
+
         return true;
     }
 
@@ -48,7 +49,16 @@ class Form
         $str = '';
 
         // On liste les attributs "courts"
-        $courts = ['checked', 'disabled', 'readonly', 'multiple', 'required', 'autofocus', 'novalidate', 'formnovalidate'];
+        $courts = [
+            'checked',
+            'disabled',
+            'readonly',
+            'multiple',
+            'required',
+            'autofocus',
+            'novalidate',
+            'formnovalidate'
+        ];
 
         // On boucle sur le tableau d'attributs
         foreach ($attributs as $attribut => $value) {

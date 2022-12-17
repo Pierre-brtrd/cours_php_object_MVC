@@ -22,7 +22,7 @@ class PostesController extends Controller
         // On va chercher les postes
         $postes = $posteModel->findActiveWithAuthor();
 
-        $this->render('Postes/index', 'base', [
+        $this->render('postes/Index/index', 'base', [
             'postes' => $postes
         ]);
     }
@@ -41,7 +41,7 @@ class PostesController extends Controller
         // On recherche une annonce
         $poste = $posteModel->find($id);
 
-        $this->render('postes/show', 'base', ['poste' => $poste]);
+        $this->render('postes/Show/show', 'base', ['poste' => $poste]);
     }
 
     /**

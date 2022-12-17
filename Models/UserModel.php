@@ -7,32 +7,32 @@ class UserModel extends Model
     /**
      * @var int
      */
-    protected $id;
+    protected int $id;
 
     /**
      * @var string
      */
-    protected $nom;
+    protected string $nom;
 
     /**
      * @var string
      */
-    protected $prenom;
+    protected string $prenom;
 
     /**
      * @var string
      */
-    protected $email;
+    protected string $email;
 
     /**
      * @var string
      */
-    protected $password;
+    protected string $password;
 
     /**
      * @var array
      */
-    protected $roles;
+    protected array $roles;
 
     public function __construct()
     {
@@ -44,9 +44,9 @@ class UserModel extends Model
      * Cherche un utilisateur par son email
      *
      * @param string $email
-     * @return mixed
+     * @return ?UserModel
      */
-    public function findOneByEmail(string $email)
+    public function findOneByEmail(string $email): ?UserModel
     {
         return $this->runQuery("SELECT * FROM $this->table WHERE email = ?", [$email])->fetch();
     }
@@ -56,7 +56,7 @@ class UserModel extends Model
      *
      * @return void
      */
-    public function setSession()
+    public function setSession(): void
     {
         $_SESSION['user'] = [
             'id' => $this->id,
@@ -206,11 +206,15 @@ class UserModel extends Model
      *
      * @param array $roles
      *
-     * @return self
+     * @return UserModel
      */
-    public function setRoles(array $roles): self
+    public function setRoles(?array $roles): self
     {
-        $this->roles = json_encode($roles);
+        if ($roles !== null) {
+            $this->roles = json_encode($roles);
+        } else {
+            $this->roles = json_encode($this->getRoles());
+        }
 
         return $this;
     }
