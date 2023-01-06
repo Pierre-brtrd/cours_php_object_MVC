@@ -7,7 +7,7 @@
                 </h2>
                 <div class="card-body">
                     <em class="card-text">Id du poste : <?= $poste->id; ?></em>
-                    <p class="card-text"><?= $poste->description; ?></p>
+                    <p class="card-text"><?= strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description; ?></p>
                     <div class="form-check form-switch mb-2">
                         <input class="form-check-input enabled" type="checkbox" role="switch" id="flexSwitchCheckDefault<?= $poste->id; ?>" <?= $poste->actif ? 'checked' : '' ?> data-id="<?= $poste->id; ?>">
                         <label class="form-check-label" for="flexSwitchCheckDefault<?= $poste->id; ?>">Actif</label>

@@ -52,16 +52,33 @@ class PosteModel extends Model
     /**
      * Cherche les postes avec les auteurs
      *
-     * @return array
+     * @return mixed
      */
-    public function findActiveWithAuthor(): array
+    public function findActiveWithAuthor(): mixed
     {
         return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.user_id = u.id WHERE actif = ?", [true])->fetchAll();
     }
 
-    public function findActiveWithLimit(int $max): array
+    /**
+     * Chercher tous les articles actifs avec une limite
+     *
+     * @param integer $max
+     * @return mixed
+     */
+    public function findActiveWithLimit(int $max): mixed
     {
         return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll();
+    }
+
+    /**
+     * Cherche un article avec l'auteur
+     *
+     * @param integer $id
+     * @return mixed
+     */
+    public function findOneActiveWithAuthor(int $id): mixed
+    {
+        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.user_id = u.id WHERE p.id = ? AND p.actif = ?", [$id, true])->fetch();
     }
 
     /**
@@ -202,7 +219,7 @@ class PosteModel extends Model
      */
     public function setUserId(int $userId): self
     {
-        $this->user_id = $userId;
+        $this->userId = $userId;
 
         return $this;
     }

@@ -39,7 +39,7 @@ class PostesController extends Controller
         $posteModel = new PosteModel();
 
         // On recherche une annonce
-        $poste = $posteModel->find($id);
+        $poste = $posteModel->findOneActiveWithAuthor($id);
 
         $this->render('postes/Show/show', 'base', ['poste' => $poste]);
     }

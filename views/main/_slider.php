@@ -18,7 +18,7 @@
                 <?php endif; ?>
                 <div class="carousel-caption d-none d-md-block">
                     <h2><?= $poste->titre; ?></h2>
-                    <p><?= $poste->description; ?></p>
+                    <p><?= strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description; ?></p>
                     <a href="/postes/details/<?= $poste->id ?>" class="btn btn-primary">En savoir plus</a>
                 </div>
             </div>

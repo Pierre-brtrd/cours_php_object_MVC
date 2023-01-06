@@ -8,7 +8,7 @@
                 <h2 class="card-title">
                     <?= $poste->titre; ?>
                 </h2>
-                <p class="card-text"><?= $poste->description; ?></p>
+                <p class="card-text"><?= strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description; ?></p>
                 <a href="/postes/details/<?= $poste->id; ?>" class="btn btn-primary">En savoir plus</a>
             </div>
         </div>
