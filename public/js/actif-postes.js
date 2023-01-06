@@ -14,6 +14,8 @@ window.onload = () => {
                     if (xmlHttp.status === 200) {
                         card.classList.remove((xmlHttp.response === 'border-success') ? 'border-danger' : 'border-success');
                         card.classList.add((xmlHttp.response === 'border-success') ? 'border-success' : 'border-danger');
+                    } else {
+                        console.errror('Error');
                     }
                 }
             }

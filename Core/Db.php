@@ -11,7 +11,7 @@ use PDOException;
 class Db extends PDO
 {
     // Instance unique de la class
-    private static Db $instance;
+    private static ?Db $instance = null;
 
     // Information de connexion en BDD
     private const DBHOST = 'db_php_POO_MVC';
@@ -47,7 +47,7 @@ class Db extends PDO
      */
     public static function getInstance(): self
     {
-        if (self::$instance === null) {
+        if (is_null(self::$instance)) {
             self::$instance = new self();
         }
 

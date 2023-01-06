@@ -40,7 +40,7 @@ class UserController extends Controller
 
             $_SESSION['message'] = "Vous êtes bien inscrit à notre application";
 
-            header('Location: /user/login');
+            header('Location: /login');
             exit();
         } else {
             $_SESSION['error'] = !empty($_POST) ? "Le formulaire est incomplet" : '';
@@ -116,7 +116,7 @@ class UserController extends Controller
             }
 
             // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
-            if ($user->id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+            if ($user->id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", json_decode($_SESSION['user']['roles']))) {
                 $_SESSION['error'] = "Vous n'avez pas accès à cet utilisateur";
                 header('Location: /admin/user');
                 exit;
@@ -155,7 +155,7 @@ class UserController extends Controller
                 isset($roles) ? $userUpdate->setRoles($roles) : null;
 
                 // On envoi l'utilisateur en BDD
-                $userUpdate->update();
+                $userUpdate->update($id);
 
                 // On redirige
                 $_SESSION['message'] = "Utilisateur modifié avec succès";
@@ -204,7 +204,7 @@ class UserController extends Controller
                 ->endGroup();
 
             // Si Admin, on peut modifier le role
-            if (in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+            if (in_array("ROLE_ADMIN", json_decode($_SESSION['user']['roles']))) {
                 $form->startGroup(['class' => 'form-group mt-2'])
                     ->addLabelFor('roles', 'Rôle :', ['class' => 'form-label'])
                     ->addSelectInput(
@@ -242,7 +242,7 @@ class UserController extends Controller
         } else {
             // L'utilisateur n'est pas connecté
             $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";
-            header('Location: /user/login');
+            header('Location: /login');
             exit;
         }
     }

@@ -113,7 +113,7 @@ class PostesController extends Controller
                 // On hydrate
                 $poste->setTitre($titre)
                     ->setDescription($description)
-                    ->setImage($image ? $image : '')
+                    ->setImage(isset($image) && !empty($image) ? $image : '')
                     ->setUserId($_SESSION['user']['id']);
 
                 // On enregistre
@@ -168,7 +168,7 @@ class PostesController extends Controller
         } else {
             // L'utilisateur n'est pas connecté
             $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";
-            header('Location: /user/login');
+            header('Location: /login');
             exit();
         }
     }
@@ -199,7 +199,7 @@ class PostesController extends Controller
             }
 
             // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
-            if ($poste->user_id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+            if ($poste->user_id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", json_decode($_SESSION['user']['roles']))) {
                 $_SESSION['error'] = "Vous n'avez pas accès à ce poste";
                 header('Location: /postes');
                 exit;
@@ -257,7 +257,7 @@ class PostesController extends Controller
                 isset($image) ? $posteUpdate->setImage($image) : '';
 
                 // On enregistre
-                $posteUpdate->update();
+                $posteUpdate->update($id);
 
                 // On redirige
                 $_SESSION['message'] = "Poste modifié avec succès";
@@ -316,7 +316,7 @@ class PostesController extends Controller
         } else {
             // L'utilisateur n'est pas connecté
             $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";
-            header('Location: /user/login');
+            header('Location: /login');
             exit;
         }
     }

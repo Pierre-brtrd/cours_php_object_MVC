@@ -83,7 +83,7 @@ class AdminController extends Controller
                  */
                 $poste->setActif($poste->getActif() ? 0 : 1);
 
-                $poste->update();
+                $poste->update($id);
             }
 
             echo $poste->getActif() ? 'border-success' : 'border-danger';
@@ -140,13 +140,13 @@ class AdminController extends Controller
     private function isAdmin()
     {
         // On vérifie si on est connecté et si role Admin pour l'utilisateur
-        if (isset($_SESSION['user']) && in_array('ROLE_ADMIN', $_SESSION['user']['roles'])) {
+        if (isset($_SESSION['user']) && in_array('ROLE_ADMIN', json_decode($_SESSION['user']['roles']))) {
             // On est admin
             return true;
         } else {
             // Pas admin, alors redirection vers page de connexion
             $_SESSION['error'] = "Vous n'avez pas accès à cette zone, connecté avec un compte Admin";
-            header('Location: /user/login');
+            header('Location: /login');
             exit;
         }
     }

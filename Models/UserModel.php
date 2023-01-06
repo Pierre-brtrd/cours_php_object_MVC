@@ -44,9 +44,9 @@ class UserModel extends Model
      * Cherche un utilisateur par son email
      *
      * @param string $email
-     * @return ?UserModel
+     * @return mixed
      */
-    public function findOneByEmail(string $email): ?UserModel
+    public function findOneByEmail(string $email): mixed
     {
         return $this->runQuery("SELECT * FROM $this->table WHERE email = ?", [$email])->fetch();
     }
@@ -63,7 +63,7 @@ class UserModel extends Model
             'prenom' => $this->prenom,
             'nom' => $this->nom,
             'email' => $this->email,
-            'roles' => json_decode((string) $this->roles),
+            'roles' => json_encode($this->roles),
         ];
     }
 
@@ -211,9 +211,9 @@ class UserModel extends Model
     public function setRoles(?array $roles): self
     {
         if ($roles !== null) {
-            $this->roles = json_encode($roles);
+            $this->roles = $roles;
         } else {
-            $this->roles = json_encode($this->getRoles());
+            $this->roles = $this->getRoles();
         }
 
         return $this;

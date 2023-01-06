@@ -70,9 +70,9 @@ class Model extends Db
     /**
      * Créé une entrée dan une table de la base de données
      *
-     * @return bool
+     * @return PDOStatement|bool
      */
-    public function create(): bool
+    public function create(): PDOStatement|bool
     {
         $champs = [];
         $inter = [];
@@ -82,8 +82,8 @@ class Model extends Db
         foreach ($this as $champ => $valeur) {
             if ($valeur !== null && $champ != 'db' && $champ != 'table' && $champ != 'fetchMod') {
                 $champs[] = $champ;
-                $inter[] = "?";
-                $valeurs[] = $valeur;
+                $inter[] = ":$champ";
+                $valeurs[$champ] = is_array($valeur) ? json_encode($valeur) : $valeur;;
             }
         }
 
@@ -98,36 +98,37 @@ class Model extends Db
     /**
      * Mettre à jour une entrée de la base de données
      *
-     * @return bool
+     * @return PDOStatement|bool
      */
-    public function update(): bool
+    public function update(int $id): PDOStatement|bool
     {
         $champs = [];
         $valeurs = [];
 
         // On boucle pour éclater le tableau d'arguments
         foreach ($this as $champ => $valeur) {
-            if ($valeur !== null && $champ != 'db' && $champ != 'table' && $champ != 'fetchMod') {
-                $champs[] = "$champ = ?";
-                $valeurs[] = $valeur;
+            if ($valeur !== null && $champ != 'db' && $champ != 'table' && $champ != 'fetchMod' && $champ != 'id') {
+                $champs[] = "$champ = :$champ";
+                $valeurs[$champ] = is_array($valeur) ? json_encode($valeur) : $valeur;
             }
         }
-        $valeurs[] = $this->id;
+
+        $valeurs['id'] = $id;
 
         // On transforme le tableu champs en string
         $listChamps = implode(', ', $champs);
 
         // On execute la requête
-        return $this->runQuery("UPDATE $this->table SET $listChamps WHERE id = ?", $valeurs);
+        return $this->runQuery("UPDATE $this->table SET $listChamps WHERE id = :id", $valeurs);
     }
 
     /**
      * Supprime une entrée de la base de données via un ID
      *
      * @param integer $id
-     * @return bool
+     * @return PDOStatement|bool
      */
-    public function delete(int $id): bool
+    public function delete(int $id): PDOStatement|bool
     {
         return $this->runQuery("DELETE FROM $this->table WHERE id = ?", [$id]);
     }
