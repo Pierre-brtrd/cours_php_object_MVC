@@ -11,7 +11,12 @@ class AdminController extends Controller
     {
         // On vérifie si l'utilisateur est admin
         if ($this->isAdmin()) {
-            $this->render('admin/index', 'admin');
+            $this->render('admin/index', 'admin', [
+                'meta' => [
+                    'title' => 'Administration du site',
+                    'description' => 'Gérez le site, retrouvez la liste des utilisateurs ainsi que la liste des postes pour les gérer',
+                ],
+            ]);
         }
     }
 
@@ -26,6 +31,9 @@ class AdminController extends Controller
 
             // On appelle la vue avec la fonction render en lui passant les données
             $this->render('admin/Postes/index', 'admin', [
+                'meta' => [
+                    'title' => 'Admin postes'
+                ],
                 'postes' => $postes,
                 'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
             ]);
@@ -105,6 +113,9 @@ class AdminController extends Controller
 
             // On appelle la vue avec la fonction render en lui passant les données
             $this->render('admin/users', 'admin', [
+                'meta' => [
+                    'title' => 'Admin des users'
+                ],
                 'users' => $users,
                 'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
             ]);

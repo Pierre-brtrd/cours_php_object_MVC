@@ -23,6 +23,12 @@ class PostesController extends Controller
         $postes = $posteModel->findActiveWithAuthor();
 
         $this->render('postes/Index/index', 'base', [
+            'meta' => [
+                'title' => 'Liste des postes',
+                'og:title' => 'Liste des postes | My app PHP Object',
+                'description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
+                'og:description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
+            ],
             'postes' => $postes
         ]);
     }
@@ -41,7 +47,20 @@ class PostesController extends Controller
         // On recherche une annonce
         $poste = $posteModel->findOneActiveWithAuthor($id);
 
-        $this->render('postes/Show/show', 'base', ['poste' => $poste]);
+        $this->render('postes/Show/show', 'base', [
+            'meta' => [
+                'title' => $poste->titre,
+                'og:title' => "$poste->titre | My app PHP Object",
+                'twitter:title' => "$poste->titre | My app PHP Object",
+                'description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
+                'og:description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
+                'twitter:description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
+                'og:image' => $poste->image ? "https://$_SERVER[HTTP_HOST]/uploads/postes/$poste->image" : null,
+                'twitter:image' => $poste->image ? "https://$_SERVER[HTTP_HOST]/uploads/postes/$poste->image" : null,
+                'twitter:card' => 'summary',
+            ],
+            'poste' => $poste
+        ]);
     }
 
     /**
@@ -59,6 +78,12 @@ class PostesController extends Controller
         $auteur = $userModel->find($id);
 
         $this->render('Postes/auteur', 'base', [
+            'meta' => [
+                'title' => "Liste des poste de $auteur->prenom $auteur->nom",
+                'og:title' => "Liste des poste de $auteur->prenom $auteur->nom | My app PHP Object",
+                'description' => "Découvrez les postes de $auteur->prenom $auteur->nom, trouvez un emploi grâce à $auteur->prenom $auteur->nom.",
+                'og:description' => "Découvrez les postes de $auteur->prenom $auteur->nom, trouvez un emploi grâce à $auteur->prenom $auteur->nom.",
+            ],
             'postes' => $postes,
             'auteur' => $auteur
         ]);
@@ -164,7 +189,13 @@ class PostesController extends Controller
                 ->addButton('Ajouter', ['class' => 'btn btn-primary mt-4 mx-auto'])
                 ->endForm();
 
-            $this->render('postes/ajouter', 'base', ['form' => $form->create()]);
+            $this->render('postes/ajouter', 'base', [
+                'meta' => [
+                    'title' => 'Créer un poste',
+                    'description' => 'Créez un poste et proposez une offre d\'emploi pour trouver de bon profil',
+                ],
+                'form' => $form->create()
+            ]);
         } else {
             // L'utilisateur n'est pas connecté
             $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";
@@ -288,7 +319,8 @@ class PostesController extends Controller
                 ->addTextArea('description', $poste->description, [
                     'id' => 'description',
                     'class' => 'form-control',
-                    'required' => true
+                    'required' => true,
+                    'rows' => 6,
                 ])
                 ->endGroup();
 
@@ -312,7 +344,13 @@ class PostesController extends Controller
                 ->endForm();
 
             // On envoie à la vue
-            $this->render('postes/modifier', 'base', ['form' => $form->create()]);
+            $this->render('postes/modifier', 'base', [
+                'meta' => [
+                    'title' => "Modifier le poste $poste->titre",
+                    'description' => 'Modifiez un poste et proposez une offre d\'emploi pour trouver de bon profil',
+                ],
+                'form' => $form->create()
+            ]);
         } else {
             // L'utilisateur n'est pas connecté
             $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";

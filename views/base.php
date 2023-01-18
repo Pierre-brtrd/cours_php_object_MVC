@@ -5,7 +5,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My app PHP Object</title>
+    <title><?= isset($meta['title']) ? $meta['title'] : null; ?> | My app PHP Object</title>
+    <?php if (isset($meta)) : ?>
+        <?php foreach ($meta as $name => $content) : ?>
+            <meta name="<?= $name; ?>" content="<?= $content; ?>">
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <meta name="og:site_name" content="My app PHP Object">
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="shortcut icon" href="/favicon/favicon.ico" type="image/x-icon">
 </head>

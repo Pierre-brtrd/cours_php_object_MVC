@@ -20,7 +20,15 @@ class MainController extends Controller
         // On va chercher toutes les annonces
         $postes = $posteModel->findActiveWithLimit(3);
 
-        $this->render('main/index', 'base', ['postes' => $postes]);
+        $this->render('main/index', 'base', [
+            'meta' => [
+                'title' => 'Homepage',
+                'og:title' => 'Homepage | My App PHP Object',
+                'description' => 'Vous cherchez un emploi ? Vous êtes sur la bonne application, retrouvez toutes les offres d\'emplois disponible sur le site.',
+                'og:description' => 'Vous cherchez un emploi ? Vous êtes sur la bonne application, retrouvez toutes les offres d\'emplois disponible sur le site.',
+            ],
+            'postes' => $postes
+        ]);
     }
 
     /**
@@ -93,7 +101,13 @@ class MainController extends Controller
             ->addButton('Me connecter', ['class' => 'btn btn-primary mt-4 mx-auto'])
             ->endForm();
 
-        $this->render('users/login', 'base', ['loginForm' => $form->create()]);
+        $this->render('users/login', 'base', [
+            'meta' => [
+                'title' => 'Se connecter',
+                'description' => 'Connectez vous à votre compte pour retrouver votre profil, gérer vos postes et vos informations',
+            ],
+            'loginForm' => $form->create()
+        ]);
     }
 
     /**

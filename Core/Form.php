@@ -239,9 +239,20 @@ class Form
         return $this;
     }
 
-    public function addImage(string $imageSrc): self
+    /**
+     * Ajoute une image dans le form
+     *
+     * @param string $path
+     * @param array $attributs
+     * @return self
+     */
+    public function addImage(string $path, array $attributs = []): self
     {
-        $this->formCode .= "<img src=\"$imageSrc\"/>";
+        $this->formCode .= "<img src=\"$path\" loading=\"lazy\"";
+
+        $this->formCode .= $attributs ? $this->addAttributs($attributs) : '';
+
+        $this->formCode .= "/>";
 
         return $this;
     }
