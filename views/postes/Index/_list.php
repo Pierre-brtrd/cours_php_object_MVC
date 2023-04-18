@@ -9,7 +9,7 @@
                     <?= $poste->titre; ?>
                 </h2>
                 <p class="card-text text-muted">
-                    <a href="/postes/auteur/<?= $poste->user_id ?>">
+                    <a href="/postes/auteur/<?= $poste->userId ?>">
                         <?= $poste->nom; ?> <?= $poste->prenom; ?>
                     </a>
                 </p>

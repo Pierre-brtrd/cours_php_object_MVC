@@ -56,7 +56,7 @@ class PosteModel extends Model
      */
     public function findActiveWithAuthor(): mixed
     {
-        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.user_id = u.id WHERE actif = ?", [true])->fetchAll();
+        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.userId = u.id WHERE actif = ?", [true])->fetchAll();
     }
 
     /**
@@ -78,7 +78,7 @@ class PosteModel extends Model
      */
     public function findOneActiveWithAuthor(int $id): mixed
     {
-        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.user_id = u.id WHERE p.id = ? AND p.actif = ?", [$id, true])->fetch();
+        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.userId = u.id WHERE p.id = ? AND p.actif = ?", [$id, true])->fetch();
     }
 
     /**
@@ -201,7 +201,7 @@ class PosteModel extends Model
     }
 
     /**
-     * Get the value of user_id
+     * Get the value of userId
      *
      * @return int
      */
@@ -211,9 +211,9 @@ class PosteModel extends Model
     }
 
     /**
-     * Set the value of user_id
+     * Set the value of userId
      *
-     * @param int $user_id
+     * @param int $userId
      *
      * @return self
      */

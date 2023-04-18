@@ -223,6 +223,7 @@ class Form
          * @var array $attr 
          */
         foreach ($options as $text => $attr) {
+            //var_dump($options);
             $this->formCode .= "<option";
             foreach ($attr as $name => $value) {
                 if ($value) {

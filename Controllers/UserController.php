@@ -224,7 +224,7 @@ class UserController extends Controller
                             ],
                         ],
                         [
-                            'class' => 'form-control'
+                            'class' => 'form-select'
                         ]
                     )
                     ->endGroup();

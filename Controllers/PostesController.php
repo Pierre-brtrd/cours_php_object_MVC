@@ -9,6 +9,12 @@ use DateTime;
 
 class PostesController extends Controller
 {
+    public function __construct(
+        private PosteModel $posteModel = new PosteModel,
+        private UserModel $userModel = new UserModel
+    ) {
+    }
+
     /**
      * Affiche la page de liste poste actif
      *
@@ -16,11 +22,8 @@ class PostesController extends Controller
      */
     public function index()
     {
-        // On insrtancie le Model Poste
-        $posteModel = new PosteModel();
-
         // On va chercher les postes
-        $postes = $posteModel->findActiveWithAuthor();
+        $postes = $this->posteModel->findActiveWithAuthor();
 
         $this->render('postes/Index/index', 'base', [
             'meta' => [
@@ -41,11 +44,8 @@ class PostesController extends Controller
      */
     public function details(int $id)
     {
-        // On instancie le model
-        $posteModel = new PosteModel();
-
         // On recherche une annonce
-        $poste = $posteModel->findOneActiveWithAuthor($id);
+        $poste = $this->posteModel->findOneActiveWithAuthor($id);
 
         $this->render('postes/Show/show', 'base', [
             'meta' => [
@@ -71,11 +71,8 @@ class PostesController extends Controller
      */
     public function auteur(int $id)
     {
-        $posteModel = new PosteModel();
-        $postes = $posteModel->findBy(['user_id' => $id]);
-
-        $userModel = new UserModel();
-        $auteur = $userModel->find($id);
+        $postes = $this->posteModel->findBy(['userId' => $id]);
+        $auteur = $this->userModel->find($id);
 
         $this->render('Postes/auteur', 'base', [
             'meta' => [
@@ -133,10 +130,8 @@ class PostesController extends Controller
                 }
 
                 // On instancie le model
-                $poste = new PosteModel();
-
-                // On hydrate
-                $poste->setTitre($titre)
+                $poste = $this->posteModel
+                    ->setTitre($titre)
                     ->setDescription($description)
                     ->setImage(isset($image) && !empty($image) ? $image : '')
                     ->setUserId($_SESSION['user']['id']);
@@ -210,16 +205,15 @@ class PostesController extends Controller
      * @param integer $id
      * @return void
      */
-    public function modifier(int $id)
+    public function modifier(string|int $id)
     {
         // On vérifie si l'utilisateur est connecté
         if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) {
             // On vérifie que le poste existe dans la BDD
             // On instancie le model
-            $posteModel = new PosteModel();
 
             // On cherche le poste avec l'id
-            $poste = $posteModel->find($id);
+            $poste = is_numeric($id) ? $this->posteModel->find($id) : null;
 
             // Si l'annonce n'existe pas, on redirige sur la liste des annonces
             if (!$poste) {
@@ -230,7 +224,7 @@ class PostesController extends Controller
             }
 
             // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
-            if ($poste->user_id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", json_decode($_SESSION['user']['roles']))) {
+            if ($poste->userId != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", json_decode($_SESSION['user']['roles']))) {
                 $_SESSION['error'] = "Vous n'avez pas accès à ce poste";
                 header('Location: /postes');
                 exit;
@@ -278,14 +272,13 @@ class PostesController extends Controller
                 }
 
                 // On instancie le model
-                $posteUpdate = new PosteModel();
-
-                // On hydrate
-                $posteUpdate->setId($poste->id)
+                $posteUpdate = $this->posteModel
+                    ->setId($poste->id)
                     ->setTitre($titre)
                     ->setDescription($description);
 
-                isset($image) ? $posteUpdate->setImage($image) : '';
+                isset($image) ? $posteUpdate->setImage($image) : null;
+                isset($_POST['user']) ? $posteUpdate->setUserId($_POST['user']) : null;
 
                 // On enregistre
                 $posteUpdate->update($id);
@@ -304,8 +297,27 @@ class PostesController extends Controller
             // On crée le formulaire
             $form = new Form();
 
+            $userArr = [];
+
+            foreach ($this->userModel->findAll() as $user) {
+
+                if ($user->id == $poste->userId) {
+                    $userArr["$user->prenom $user->nom"] = [
+                        'value' => $user->id,
+                        'selected' => true,
+                    ];
+                } else {
+                    $userArr["$user->prenom $user->nom"] = [
+                        'value' => $user->id,
+                    ];
+                }
+            }
+
+
+
             $form->startForm('POST', '', ['class' => 'form card p-3', 'enctype' => 'multipart/form-data'])
-                ->startGroup(['class' => 'form-group'])
+                ->startGroup(['class' => 'row'])
+                ->startGroup(['class' => 'col-md-6'])
                 ->addLabelFor('titre', 'Titre du poste :', ['class' => 'form-label'])
                 ->addInput('text', 'titre', [
                     'id' => 'titre',
@@ -313,6 +325,14 @@ class PostesController extends Controller
                     'value' => $poste->titre,
                     'required' => true
                 ])
+                ->endGroup()
+                ->startGroup(['class' => 'col-md-6'])
+                ->addLabelFor('user', 'Auteur:', ['class' => 'form-label'])
+                ->addSelectInput('user', $userArr, [
+                    'class' => 'form-select',
+                    'id' => 'user'
+                ])
+                ->endGroup()
                 ->endGroup()
                 ->startGroup(['class' => 'form-group mt-3'])
                 ->addLabelFor('description', 'Texte du poste :', ['class' => 'form-label'])
