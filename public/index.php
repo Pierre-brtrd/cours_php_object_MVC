@@ -1,7 +1,7 @@
 <?php
 
-use App\Autoloader;
 use App\Core\Main;
+use App\Autoloader;
 
 // Définition de la contante contenant le dossier racine du projet
 define('ROOT', dirname(__DIR__));

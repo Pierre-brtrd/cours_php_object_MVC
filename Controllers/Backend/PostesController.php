@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Backend;
 
-use App\Core\Form;
-use App\Models\PosteModel;
-use App\Models\UserModel;
 use DateTime;
+use App\Core\Form;
+use App\Core\Route;
+use App\Core\Controller;
+use App\Models\UserModel;
+use App\Models\PosteModel;
 
 class PostesController extends Controller
 {
@@ -15,75 +17,25 @@ class PostesController extends Controller
     ) {
     }
 
-    /**
-     * Affiche la page de liste poste actif
-     *
-     * @return void
-     */
-    public function index()
+    #[Route('admin.poste.index', '/admin/postes', ['GET'])]
+    public function postes()
     {
-        // On va chercher les postes
-        $postes = $this->posteModel->findActiveWithAuthor();
+        if ($this->isAdmin()) {
+            // On instancie le model correspondant à la table postes
+            $posteModel = new PosteModel();
 
-        $this->render('postes/Index/index', 'base', [
-            'meta' => [
-                'title' => 'Liste des postes',
-                'og:title' => 'Liste des postes | My app PHP Object',
-                'description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
-                'og:description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
-            ],
-            'postes' => $postes
-        ]);
-    }
+            // On va chercher toutes les annonces
+            $postes = $posteModel->findAll();
 
-    /**
-     * Affiche un article
-     *
-     * @param integer $id
-     * @return void
-     */
-    public function details(int $id)
-    {
-        // On recherche une annonce
-        $poste = $this->posteModel->findOneActiveWithAuthor($id);
-
-        $this->render('postes/Show/show', 'base', [
-            'meta' => [
-                'title' => $poste->titre,
-                'og:title' => "$poste->titre | My app PHP Object",
-                'twitter:title' => "$poste->titre | My app PHP Object",
-                'description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
-                'og:description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
-                'twitter:description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
-                'og:image' => $poste->image ? "https://$_SERVER[HTTP_HOST]/uploads/postes/$poste->image" : null,
-                'twitter:image' => $poste->image ? "https://$_SERVER[HTTP_HOST]/uploads/postes/$poste->image" : null,
-                'twitter:card' => 'summary',
-            ],
-            'poste' => $poste
-        ]);
-    }
-
-    /**
-     * Affiche les postes par auteur
-     *
-     * @param integer $id
-     * @return void
-     */
-    public function auteur(int $id)
-    {
-        $postes = $this->posteModel->findBy(['userId' => $id]);
-        $auteur = $this->userModel->find($id);
-
-        $this->render('Postes/auteur', 'base', [
-            'meta' => [
-                'title' => "Liste des poste de $auteur->prenom $auteur->nom",
-                'og:title' => "Liste des poste de $auteur->prenom $auteur->nom | My app PHP Object",
-                'description' => "Découvrez les postes de $auteur->prenom $auteur->nom, trouvez un emploi grâce à $auteur->prenom $auteur->nom.",
-                'og:description' => "Découvrez les postes de $auteur->prenom $auteur->nom, trouvez un emploi grâce à $auteur->prenom $auteur->nom.",
-            ],
-            'postes' => $postes,
-            'auteur' => $auteur
-        ]);
+            // On appelle la vue avec la fonction render en lui passant les données
+            $this->render('admin/Postes/index', 'admin', [
+                'meta' => [
+                    'title' => 'Admin postes'
+                ],
+                'postes' => $postes,
+                'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+            ]);
+        }
     }
 
     /**
@@ -91,6 +43,7 @@ class PostesController extends Controller
      *
      * @return void
      */
+    #[Route('admin.poste.creat', '/admin/poste/create', ['GET', 'POST'])]
     public function ajouter()
     {
         // On vérifie si l'utilisateur est connecté
@@ -205,6 +158,7 @@ class PostesController extends Controller
      * @param integer $id
      * @return void
      */
+    #[Route('admin.poste.edit', '/admin/poste/edit/([0-9]+)', ['GET', 'POST'])]
     public function modifier(string|int $id)
     {
         // On vérifie si l'utilisateur est connecté
@@ -374,6 +328,85 @@ class PostesController extends Controller
         } else {
             // L'utilisateur n'est pas connecté
             $_SESSION['error'] = "Vous devez être connecté(e) pour accèder à cette page";
+            header('Location: /login');
+            exit;
+        }
+    }
+
+    /**
+     * Supprime un poste
+     *
+     *
+     * @return void
+     */
+    #[Route('admin.postes.delete', '/admin/deletePoste', ['POST'])]
+    public function deletePoste()
+    {
+        if ($this->isAdmin()) {
+            $poste = new PosteModel();
+
+            if (hash_equals($_POST['token'], $_SESSION['token']) && !empty($_POST['id'])) {
+                $poste->delete($_POST['id']);
+                $_SESSION['message'] = "Poste supprimé avec succés";
+            } else {
+                $_SESSION['error'] = "Une erreur est survenue";
+            }
+
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
+            exit();
+        }
+    }
+
+    /**
+     * Active ou désactive un poste
+     *
+     * @param integer $id
+     * @return void
+     */
+    #[Route('admin.poste.visibility', '/admin/actifPoste/([0-9]+)',  ['GET'])]
+    public function actifPoste(int $id)
+    {
+        if ($this->isAdmin()) {
+            $posteModel = new PosteModel();
+            $posteArray = $posteModel->find($id);
+
+            if ($posteArray) {
+                $poste = $posteModel->hydrate($posteArray);
+
+                /**
+                 *  if ($poste->getActif()) {
+                 *      $poste->setActif(0)
+                 *  } else {
+                 *      $poste->setActif(1);
+                 *  }
+                 * 
+                 *  Utilisation du ternaire pour simplifier le code sur 1 ligne :
+                 * 
+                 * @var PosteModel $poste
+                 */
+                $poste->setActif($poste->getActif() ? 0 : 1);
+
+                $poste->update($id);
+            }
+
+            echo $poste->getActif() ? 'border-success' : 'border-danger';
+        }
+    }
+
+    /**
+     * Vérifie si on est Admin
+     *
+     * @return boolean
+     */
+    private function isAdmin()
+    {
+        // On vérifie si on est connecté et si role Admin pour l'utilisateur
+        if (isset($_SESSION['user']) && in_array('ROLE_ADMIN', json_decode($_SESSION['user']['roles']))) {
+            // On est admin
+            return true;
+        } else {
+            // Pas admin, alors redirection vers page de connexion
+            $_SESSION['error'] = "Vous n'avez pas accès à cette zone, connecté avec un compte Admin";
             header('Location: /login');
             exit;
         }

@@ -83,7 +83,7 @@ class Model extends Db
             if ($valeur !== null && $champ != 'db' && $champ != 'table' && $champ != 'fetchMod') {
                 $champs[] = $champ;
                 $inter[] = ":$champ";
-                $valeurs[$champ] = is_array($valeur) ? json_encode($valeur) : $valeur;;
+                $valeurs[$champ] = is_array($valeur) ? json_encode($valeur) : $valeur;
             }
         }
 

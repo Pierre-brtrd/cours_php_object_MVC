@@ -13,7 +13,7 @@
             <div class="card">
                 <h2 class="card-header">Administration des users</h2>
                 <div class="card-body">
-                    <a href="/admin/user" class="btn btn-primary">Gérer les utilisateurs</a>
+                    <a href="/admin/users" class="btn btn-primary">Gérer les utilisateurs</a>
                 </div>
             </div>
         </div>

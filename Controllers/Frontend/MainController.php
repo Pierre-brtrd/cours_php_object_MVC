@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Frontend;
 
 use App\Core\Form;
-use App\Models\PosteModel;
+use App\Core\Route;
+use App\Core\Controller;
 use App\Models\UserModel;
+use App\Models\PosteModel;
 
 class MainController extends Controller
 {
@@ -13,6 +15,7 @@ class MainController extends Controller
      *
      * @return void
      */
+    #[Route('homepage', '/', ['GET'])]
     public function index()
     {
         $posteModel = new PosteModel();
@@ -36,6 +39,7 @@ class MainController extends Controller
      *
      * @return void
      */
+    #[Route('login', '/login', ['GET', 'POST'])]
     public function login()
     {
         if (Form::validate($_POST, ['email', 'password'])) {
@@ -115,6 +119,7 @@ class MainController extends Controller
      *
      * @return void
      */
+    #[Route('logout', '/logout', ['GET'])]
     public function logout()
     {
         unset($_SESSION['user']);
@@ -128,6 +133,11 @@ class MainController extends Controller
 
     public function error(int $statusCode)
     {
-        $this->render('error/error', 'base', ['code' => $statusCode]);
+        $this->render('error/error', 'base', [
+            'code' => $statusCode,
+            'meta' => [
+                'title' => "Erreur $statusCode",
+            ]
+        ]);
     }
 }

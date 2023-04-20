@@ -14,7 +14,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <a href="/postes/modifier/<?= $poste->id; ?>" class="btn btn-warning">Modifier</a>
+                            <a href="/admin/poste/edit/<?= $poste->id; ?>" class="btn btn-warning">Modifier</a>
                         </div>
                         <div class="col-md-6">
                             <form action="/admin/deletePoste" method="POST" onsubmit="return confirm('Êtes-vous vraiment sûr de vouloir supprimer ce poste ?')">

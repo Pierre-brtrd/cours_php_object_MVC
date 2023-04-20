@@ -2,33 +2,17 @@
 
 namespace App\Core;
 
-use App\Controllers\MainController;
-
-/**
- * Routeur principal
- * 
- * @package App\Core
- */
 class Main
 {
+    public function __construct(
+        private Router $router = new Router
+    ) {
+    }
+
     public function start()
     {
-        // On démarre la session PHP
         session_start();
 
-        /* Exemple d'URL de notre application :
-            http://localhost:8005/controller/methode/parametres
-            http://localhost:8005/postes/details/toto
-
-            Création des réécriture d'url :
-            http://localhost:8005/index.php?p=postes/details/toto
-
-            Test de fonctionnement avec var_dump($_GET);
-        */
-
-        // ----------------------------------------------------------------
-        // NETTOYAGE DE L'URL
-        // On reitre le trailing slash (dernier slash de l'URL)
         $uri = $_SERVER['REQUEST_URI'];
 
         // On verifie que l'URI n'est pas vide
@@ -45,53 +29,50 @@ class Main
             exit;
         }
 
-        // On gère les parametres de l'URL
-        // p=controlleur/methode/parametres
-        // On sépare les parametres dans un tableau
-        $params = explode('/', $_GET['p']);
+        $this->initRouter();
 
-        if ($params[0] != '' && $params[0] != 'login' && $params[0] != 'logout') {
-            // On a au moins 1 parametre
-            // On vérifie que le fichier du controlleur demandé existe
-            $file = '/app/Controllers/' . ucfirst($params[0]) . 'Controller.php';
+        $this->router->handleRequest($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+    }
 
-            if (file_exists($file)) {
-                // On récupère le nom du controller a instancier
-                // On doit mettre une maj en première lettre, on ajoute le namespace avant et on ajoute "Controller" après
-                $controller = '\\App\\Controllers\\' . ucfirst(array_shift($params)) . 'Controller';
+    private function initRouter(): void
+    {
+        $files = glob(\dirname(__DIR__) . '/Controllers/*.php');
 
-                // On instancie le controlleur
-                $controller = new $controller;
+        $files = array_merge_recursive(glob(\dirname(__DIR__) . '/Controllers/**/*.php', GLOB_BRACE), $files);
 
-                // On récupère le deuxième paramètre d'URL
-                $action = (isset($params[0])) ? array_shift($params) : 'index';
-
-                if (method_exists($controller, $action)) {
-                    // S'il reste encore des parametres, on les passe à la methode
-                    (isset($params[0])) ? call_user_func_array([$controller, $action], $params) : $controller->$action();
-                } else {
-                    http_response_code(404);
-                    $controller = new MainController();
-
-                    $controller->error(404);
-                }
-            } else {
-                http_response_code(404);
-                $controller = new MainController();
-
-                $controller->error(404);
-            }
-        } else {
-            // On a pas de parametres, donc on instancie le controller par défaut
-            $controller = new MainController();
-
-            if ($params[0] != '') {
-                $action = array_shift($params);
-                $controller->$action();
-            }
-
-            // On appelle la methode index
-            $controller->index();
+        foreach ($files as $file) {
+            $classes[] = $this->convertFileToNamespace($file);
         }
+
+        foreach ($classes as $class) {
+            $methods = get_class_methods($class);
+            foreach ($methods as $method) {
+                $attributes = (new \ReflectionMethod($class, $method))->getAttributes(Route::class);
+                foreach ($attributes as $attribute) {
+                    if ($attribute) {
+                        $route = $attribute->newInstance();
+                        $route->setController($class);
+                        $route->setAction($method);
+                        $this->router->addRoute([
+                            'name' => $route->getName(),
+                            'url' => $route->getUrl(),
+                            'methods' => $route->getMethods(),
+                            'controller' => $route->getController(),
+                            'action' => $route->getAction(),
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    private function convertFileToNamespace(string $file): string
+    {
+        $file = substr($file, 1);
+        $file = str_replace('/', '\\', $file);
+        $file = substr($file, 0, -4);
+        $file = ucfirst($file);
+
+        return $file;
     }
 }
