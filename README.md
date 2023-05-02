@@ -10,24 +10,18 @@ Pour informations, le MVC est utilisé par plusieurs frameworks pour application
 
 Pour le cours, nous allons mettre en place une petite application web qui va ressembler à Indeed, nous allons mettre en avant des annonces de postes.
 
-
-
 ## MVC définition
 
-MVC est un acronyme pour définir **M**odel **V**ue **C**ontroller, ce design pattern est destiner à scinder votre développement en 3 grands pôle de fichiers/dossiers :
+MVC est un acronyme pour définir **M**odel **V**ue **C**ontroller, ce design pattern est destiner à scinder votre développement en 3 grands pôles de fichiers/dossiers :
 
 - __Les models__ : 
-  - Dans ces fichiers, vous mettrez vos objets (classes), ce sont 
+  - Dans ces fichiers, vous mettrez vos objets (classes), ce sont les fichiers qui représenteront vos tables ainsi que les fichiers qui vont communiquer avec la base de données.
 - __Les vues__ :
-  - Dans ces fichiers, vous allez mettre toute la partie interface graphique de votre application (vos pages)
+  - Dans ces fichiers, vous allez mettre toute la partie interface graphique de votre application (vos pages), en HTML avec un peu de PHP pour faire de l'affichage dynamique, mais pas de script.
 - __Les controllers__ :
-  - Contient la logique concernant les actions à effectuer par l'utilisateur.
-
-
+  - Contient la logique concernant les actions à effectuer pour chaque page.
 
 Pour apprendre ce model MVC, nous allons développer ensemble une petite application web qui va reprendre tous les concepts du module MVC.
-
-
 
 ## La base de données
 
@@ -77,7 +71,7 @@ private const DBPASS = 'root';
 private const DBNAME = "demo_mvc";
 ```
 
-À partir de maintenant, nous avons toutes les informations de connexion à notre base de données, nous pouvons commencer à créer notre constructeur, il va avoir comme informations le dsn de connexion, ainsi qu'appeler le constructeur de la classe PDO, rappelez vous que nous avons étendu de la classe PDO, donc on appelle le constructeur de la classe PDO en lui passant les informations de connexion en base :
+À partir de maintenant, nous avons toutes les informations de connexion à notre base de données, nous pouvons commencer à créer notre constructeur, il va avoir comme informations le dsn *(data Source Name ou grossièrement, l'url de notre base de données)* de connexion, ainsi qu'appeler le constructeur de la classe PDO, rappelez vous que nous avons étendu de la classe PDO, donc on appelle le constructeur de la classe PDO en lui passant les informations de connexion en base :
 
 __Rappel__, quand on utilise PDO, le mieux est de créer une structure avec un try pour gérer les potentielles erreur de connexion en BDD, donc nous allons avoir la structure suivante :
 
@@ -148,14 +142,12 @@ Bien, maintenant faisons le point sur ce que nous venons de faire sur la classe 
 - Création des constantes (privées) avec les informations de connexion
 - Création du constructeur de la classe : 
   - On crée le DSN avec l'url de la base de données
-  - On appelle le constructeur de la classe PDO et on lu passe toutes les informations
+  - On appelle le constructeur de la classe PDO et on lui passe toutes les informations
   - On définit les paramètres de PDO
   - On vérifie s'il y a des erreurs
 - Création de la méthode pour récupérer notre instance de la classe Db
 
-Maintenant, pout utiliser notre instance à l'extérieur de notre instance, nous aurons simplement à faire `Db::getInstance()`
-
-
+Maintenant, pout utiliser notre instance à l'extérieur de notre classe, nous aurons simplement à faire `Db::getInstance()`
 
 ## Le Model
 
@@ -208,7 +200,7 @@ En d'autres termes, nous allons créer une méthode qui va vérifier si elle doi
 Cette méthode aura comme paramètre la requêtes SQL, et si besoin un tableau d'options :
 
 ```php
-public function runQuery(string $sql, array $attributs = null)
+public function runQuery(string $sql, ?array $attributs = []): PDOStatement|bool
 {
 }
 ```
@@ -216,7 +208,7 @@ public function runQuery(string $sql, array $attributs = null)
 Ensuite on va récupérer ou instancier l'instance de Db :
 
 ```php
-public function runQuery(string $sql, array $attributs = null)
+public function runQuery(string $sql, ?array $attributs = []): PDOStatement|bool
 {
   // On récupère l'instance Db
   $this->db = Db::getInstance();
@@ -226,7 +218,7 @@ public function runQuery(string $sql, array $attributs = null)
 Ensuite, nous allons vérifier si nous avons des attributs, si oui, c'est que nous sommes dans le cadre d'une requête préparée, sinon, c'est une requête simple :
 
 ````php
-public function runQuery(string $sql, array $attributs = null)
+public function runQuery(string $sql, ?array $attributs = null): PDOStatement|bool
 {
   // On récupère ou instancie Db
   $this->db = Db::getInstance();
@@ -282,7 +274,7 @@ Cette méthode va nous permettre de récupérer toutes les entrées d'une table,
 Dans cette méthode, nous allons utiliser la méthode runQuery et lui passer la requête SQL :
 
 ```php
-public function findAll()
+public function findAll(): array
 {
   $query = $this->runQuery('SELECT * FROM' . $this->table);
   return $query->fetchAll();
@@ -1119,7 +1111,7 @@ Vous n'aurez plus jamais besoin d'y retoucher.
 
 ### La class Main
 
-Maintenant que notre fichier index.php est finalisée, nous allons créer la classe Main qui sera notre routeur.
+Maintenant que notre fichier index.php est finalisée, nous allons créer la classe Main qui va initialiser notre routeur.
 
 Créez donc un fichier Main.php dans le dossier Core.
 
@@ -1153,23 +1145,9 @@ Si vous rechargez la page d'accueil vous devriez voir le message Ça fonctionne.
 
 Félicitation, votre routeur est opérationnel, maintenant nous allons devoir gérer notre routeur pour qu'il commence à résoudre les urls et cherche les bons controlleurs pour afficher les pages.
 
-
-
 ### Gérer les URL
 
-Maintenant que votre routeur est appeler, il faut se pencher sur le fonctionnement des URL, à savoir comment trouver le bon controlleur ainsi que la méthode à utiliser.
-
-Dans notre cas, nous avons nous pouvons découper l'url comme suit : 
-
-http://localhost:8005/controlleur/methode/parametres
-
-Donc ce qui donnerait
-
-http://localhost:8005/postes/details/toto
-
-Donc le premier mot qui suit le nom de domaine sera notre controlleur, ensuite nous aurons la méthode à utiliser et enfin les paramètres.
-
-Le problème que nous avons, c'est que par défaut, en écrivant cette url, le navigateur va chercher le dossier postes, dans lequel il va chercher le dossier méthode et enfin le fichier paramètres.
+Pour utiliser notre routeur, nous avons déjà un premier problème, le problème que nous avons, c'est que par défaut, en écrivant cette url, le navigateur va chercher le dossier postes, dans lequel il va chercher le dossier méthode et enfin le fichier paramètres.
 
 Donc tel quel, nous ne pouvons pas mettre en place un routeur comme celui-ci, POUR L'INSTANT !
 
@@ -1259,11 +1237,134 @@ var_dump($_GET);
 
 En rechargeant la page, vous devriez voir les paramètres passé en URL, notre réécriture est bonne, nous sommes toujours dans le fichier index.php, nous récupérons les paramètres et nous réécrivons l'url.
 
+Maintenant que nous pouvons réécrire les urls, nous allons devoir mettre en place notre routeur, ce routeur aura pour but de récupérer l'url envoyée par le client (navigateur), et trouver la méthode dans nos controllers qui est rattachés, mais nous aimerions que tout se fasse dynamiquement.
+
+Dans l'idée, nous voulons qu'à la création d'une méthode dans un crontroller, nous pouvons rajouter un attribut PHP qui va permettre de définir une nouvelle url sur notre application et que pour cette url, c'est la méthode que nous développons qui doit être appelée.
+
+Par exemple :
+
+```php
+#[Route('homepage', '/', ['GET'])]
+public function homePage()
+{
+  echo "Page d'accueil"
+}
+```
+
+Ici l'attribut `#[Route('homepage', '/', ['GET'])]` doit définir une nouvelle route sur notre application, qui sera accessible sur l'url **/** et possible seulement en méthode **GET**.
+
+### L'attribut Route de nos méthodes
+
+Dans l'exemple ci-dessus, nous avons définit un attribut `Route` à notre méthode homePage, mais pour le moment, cette attribut n'existe pas, il faut le créer avec une classe légèrement particulière, elle va définir nos future objets qui seront des attributs de méthodes.
+
+Pour ce faire, vous allez créer un fichier **Route.php** dans le dossier Core.
+
+```php
+<?php
+
+namespace App\Core;
+
+#[\Attribute]
+class Route
+{
+}
+```
+
+Ici vous notez que nous utilisons l'attributs PHP 8 sur notre classe, c'est ça qui transforme notre classe en classe pour attribut que nous pourrons par la suite utiliser dans notre controller pour chaque méthode.
+
+Maintenant nous devons définir ce que vont stocker nos instances de la classe Route, concrètement, chaque route de notre application va devoir stocker 5 valeurs :
+
+- **Le controller** -> nous allons stocker le controller à instancier pour chaque route
+- **L'action** -> nous allons stocker le nom de la méthode dans le controller à exécuter pour chaque route
+- **Le nom** -> nous allons stocker le nom de la route afin de pouvoir la retrouver plus facilement
+- **L'url** -> nous allons stocker l'url de la route
+- **Les méthodes** -> nous allons stocker les méthodes HTTP possible pour chaque route.
+
+Maintenant, nous allons créer ces propriétés dans la classe Route, chose à noter, la propriété controller et action ne seront pas obligatoirement rempli à l'instanciation, donc nous ne pouvons pas les créer directement dans le contructeur :
+
+```php
+private ?string $controller = null;
+private ?string $action = null;
+
+public function __construct(
+    private ?string $name = null,
+    private ?string $url = null,
+    private ?array $methods = [],
+) {
+}
+```
+
+Maintenant, comme vous le voyez, toutes nos propriétés sont en private, ce qui signifie que nous devons créer des accesseurs (getter et setter) pour chaque propriétés :
+
+```php
+public function getName(): ?string
+{
+    return $this->name;
+}
+
+public function setName(string $name): self
+{
+    $this->name = $name;
+
+    return $this;
+}
+
+public function getUrl(): ?string
+{
+    return $this->url;
+}
+
+public function setUrl(string $url): self
+{
+    $this->url = $url;
+
+    return $this;
+}
+
+public function getMethods(): ?array
+{
+    return $this->methods;
+}
+
+public function setMethods(array $methods): self
+{
+    $this->methods = $methods;
+
+    return $this;
+}
+
+public function getController(): ?string
+{
+    return $this->controller;
+}
+
+public function setController(string $controller): self
+{
+    $this->controller = $controller;
+
+    return $this;
+}
+
+public function getAction(): ?string
+{
+    return $this->action;
+}
+
+public function setAction(string $action): self
+{
+    $this->action = $action;
+
+    return $this;
+}
+```
+
+Nous avons maintenant terminé la classe Route que va nous permettre de créer une route simplement en ajoutant un attribut avec la classe Route et en renseignant le nom de la route, l'url ainsi que les méthods directement sur les méthodes de nos controllers.
+
 ### Le trailing /
 
-Ce dernier / n'est jamais utile dans les urls et peux générer du duplicate content (impact SEO), donc nous allons vouloir retirer le training /.
+Le dernier / dans une url n'est jamais utile dans les urls et peut générer du duplicate content (impact SEO), donc nous allons vouloir retirer le training /.
 
-Nous allons le faire directement dans le routeur (Main), dans la méthode start(), c'est la première chose que doit faire notre méthode.
+Nous allons le faire directement dans le fichier Main, dans la méthode start(), c'est la première chose que doit faire notre méthode start dans la classe Main.
 
 Donc d'abord, on récupère l'url :
 
@@ -1308,212 +1409,346 @@ if (!empty($uri) && $uri != "/" && $uri[-1] === "/") {
 
   // On redirige l'url
   header('Location: ' . $uri);
+  exit();
 }
 ```
 
 Maintenant, essayer d'écrire une url avec un / à la fin, vous devriez être rediriger automatiquement vers la même url sans le /.
 
-### Les paramètres
+### Création du Routeur
 
-Maintenant que nous avons nettoyer les url, nous allons devoir gérer les paramètres qui sont envoyés via l'url (p=controlleur/methode/paramètres).
+Maintenant que nous avons nettoyé nos URL, nous allons devoir initialiser notre routeur, afin qu'il puisse récupérer toutes les routes que nous voulons sur notre application et qu'il puisse vérifier que l'url envoyé par le navigateur correspond à une url que nous avons définit dans un de nos controllers.
 
-Nous allons stocker ces informations sous forme de tableau, donc séparer tous les paramètres séparé par un / :
+Avant de pouvoir initialiser le routeur, il va falloir le créer ! 
 
-```php
-// On gère les paramètres
-$params = explode('/', $_GET['p']);
-var_dump($params);
-```
-
-Ici on explose la chaine de caractère en tableau et on vient récupérer la variable `p` passée dans l'url.
-
-Si vous allez sur une page avec une Uri : toto/tata, vous devriez voir un tableau à 2 entrées avec toto et tata, donc on stocke bien les paramètres dans un tableau.
-
-Maintenant, nous allons devoir vérifier que nous avons au moins 1 paramètres dans le tableau, ce premier paramètre devra être notre controlleur :
-
-```php
-// On gère les paramètres
-$params = explode('/', $_GET['p']);
-
-if($params[0] != '') {
-
-}
-```
-
-Maintenant, on va gérer le else : il n'y a pas de paramètre :
-
-```php
-// On gère les paramètres
-$params = explode('/', $_GET['p']);
-
-if ($params[0] != '') {
-  // On a au moins 1 paramètres
-  var_dump($params);
-} else {
-  echo 'Pas de paramètres';
-}
-```
-
-Mais plutôt que de renvoyer un echo, nous allons créer un controller par défaut, car si nous n'avons pas de paramètres c'est la page d'accueil, donc si pas de paramètres, on instancie le contrôler de la page d'accueil, généralement on l'appelle MainController.
-
-Donc dans un premier temps, il va falloir créer le fichier MainController.php dans le dossier Controllers :
+Donc vous devez créer un nouveau fichier **Router.php** dans le dossier Core, ce sera la classe de notre Routeur qui va stocker toutes les routes de notre application, qui va pouvoir ajouter des routes et enfin, pouvoir comparer l'url envoyé par le navigateur par rapport à toutes les routes stocker dans le routeur.
 
 ```php
 <?php
 
-namespace App\Controller;
+namespace App\Core;
 
-class MainController
+class Router
 {
-    public function index()
-    {
-        echo "Page d'accueil";
+}
+```
+
+Ici, nous voulons que le routeur stock les routes dans un tableaux, donc nous allons devoir créer une propriétés :
+
+```php
+/**
+* List of routes of the applications
+*
+* @var array<int, Route> $routes
+*/
+private array $routes = [];
+```
+
+Maintenant, nous allons vouloir développer une méthode qui va permettre d'ajouter une route dans le tableaux que nous venons de créer :
+
+```php
+public function addRoute(array $route): self
+{
+    $this->routes[] = $route;
+
+    return $this;
+}
+```
+
+Enfin, nous voulons créer une méthode dans le routeur qui permet de vérifier si l'url envoyé par le client correspond à une route définit dans l'application, auquel cas, le routeur devra instancier le bon controller et exécuter la méthode correspondante à la route :
+
+```php
+public function handleRequest(string $url, string $method): void
+{
+  // On boucle sur toutes les routes de notre application
+  foreach ($this->routes as $route) {
+    // On vérifie si l'url du navigateur correspond à une url dans notre routeur et
+    // si la méthode HTTP du navigateur correspond à celle de la route
+    if($url === $route['url'] && in_array($method, $route['methods']) {
+      // On récupère le nom du controller de la route
+      $controllerName = $route['controller'];
+      // On récupère le nom de la méthode à exécuter pour cette route
+      $actionName = $route['action'];
+      // On instancie le controller
+      $controller = new $controllerName();
+      // On exécute la méthode dans le controller
+      $controller->$actionName();
+      
+      // Si nous avons exècuté la méthode on sort de la boucl, la page doit s'afficher
+      return;
     }
-}
-```
-
-Dans ce contrôler, nous ajoutons simplement une méthode index qui sera appelé quand nous sommes sur la page d'accueil de l'application, qui pour l'instant ne renverra qu'un echo Page d'accueil.
-
-Maintenant, retour dans notre fichier Main, dans le esle (pas de paramètre), on va instancier le MainController et appeler la méthode index :
-
-```php
-// On gère les paramètres
-$params = explode('/', $_GET['p']);
-
-if ($params[0] != '') {
-  // On a au moins 1 paramètres
-  var_dump($params);
-} else {
-  // On instancie le Main Controller
-  $controller = new MainController();
-
-  // On appelle la méthode indexe
-  $controller->index();
-}
-```
-
-Maintenant, si vous allez sur la page d'accueil, vous verrez le message "Page d'accueil".
-
-Très bien, maintenant, nous allons gérer les urls avec au moins 1 paramètres, donc nous allons utiliser le tableau $params et récupérer le nom du controleur.
-
-Mais ici, avant de pouvoir instancier le bon controlleur, nous avons quelques actions à faire, en effet dans l'url nous ne voulons pas avoir __/PostesController.php__ mais seulement __postes__ et qu'automatiquement, notre routeur ajoute lui même Controller.php et mette postes avec un P majuscule.
-
-```php
-if ($params[0] != '') {
-  // On a au moins 1 paramètres
-  // On récupère le nom du controlleur
-  $controller = '\\App\\Controllers\\' . ucfirst(array_shift($params)) . 'Controller';
-
-  var_dump($controller);
-  die();
-} else {
-  // On instancie le Main Controller
-  $controller = new MainController();
-
-  // On appelle la méthode indexe
-  $controller->index();
-}
-```
-
-Dans notre if nous avons fait plusieurs actions :
-
-- `$controller = '\\App\\Controllers\\'` => nous permet d'ajouter le chemin complet du use vers le controller
-- `. ucfirst(array_shift($params))` => On récupère le premier paramètre du tableau et on l'enlève du tableau avec `array_shift`, mais nous mettons en plus la première lettre du paramètre avec une majuscule avec `ucfirst()`.
-- `. 'Controller';` => On ajoute à la fin Controller pour aller chercher la bonne classe.
-
-Ce qui fait que si vous allez sur la page /postes, vous devriez voir le chemin complet du use du controller postes :
-
-```php
-'\App\Controllers\PostesController'
-```
-
-Maintenant, on veut instancier ce controller.
-
-Donc on va simplement faire :
-
-```php
-if ($params[0] != '') {
-  // On a au moins 1 paramètres
-  // On récupère le nom du controlleur
-  $controller = '\\App\\Controllers\\' . ucfirst(array_shift($params)) . 'Controller';
-
-  $controller = new $controller();
-  var_dump($controller);
-}
-```
-
-On faisant le new $controller() on instancie la classe avec le chemin du namespace complet.
-
-Le problème que nous pourrions avoir ici, c'est si le fichier du controller n'existe pas, ça veut dire que l'instanciation du controller va nous donner une erreur PHP, donc on peut avant d'instancier le controller vérifier que le fichier existe, pour ça, nous allons devoir modifier un peu notre fichier :
-
-```php
-if ($params[0] != '') {
-  // On a au moins 1 paramètres
-  // On vérifie que le fichier du controller existe
-  $fileController = ROOT . '/Controllers/' . ucfirst($params[0]) . 'Controller.php';
-
-  if (file_exists($fileController)) {
-    // On instancie le controller
-    $controller = '\\App\\Controllers\\' . ucfirst(array_shift($params)) . 'Controller';
-
-    $controller = new $controller;
-    var_dump($controller);
-  } else {
-    // Sinon on renvoi une page not found
-    http_response_code(404);
-    echo 'Page not found';
+       
+   // Si la boucle n'a trouvé aucune correspondance, on envoit un message d'erreur
+   http_repsonse_code(404);
+   echo "Page non trouvé";
   }
 }
 ```
 
-Maintenant, si le fichier existe, on l'instancie, sinon on renvoie une 404.
+### Initialisation du Routeur
 
-Ensuite, nous allons devoir vérifier si il y a encore un paramètres donc la méthode du controlleur. 
+Maintenant que notre routeur est créé, nous allons devoir l'utiliser dans notre méthode Start dans la class Main afin de l'initialiser et de pouvoir faire les vérifications de nos url.
 
-Donc on va le vérifier avec un ternaire, si on a encore un paramètre on le récupère et on définit la méthode du controller à utilise, sinon, ce sera la méthode index du controller :
-
-```php
-$action = (isset($params[0])) ? array_shift($params) : 'index';
-```
-
-Ce qui fait que si on a un paramètre, la variable $action sera le paramètre qu'on sort du tableau params, sinon $action sera index.
-
-Maintenant, il faut vérifier que la méthode demandé existe ou non :
+Dans un premier temps, nous allons dans le constructeur de la class main créer une propriété qui va stocker notre routeur afin de pouvoir l'utiliser plus facilement dans la méthode start :
 
 ```php
-if (method_exists($controller, $action)) {
-  // La méthode existe
-} else {
-  http_response_code(404);
-  echo 'Page not found';
+public function __construct(
+    private Router $router = new Router
+) {
 }
 ```
 
-Maintenant, nous avons vérifié si la méthode existe, sinon page 404.
+À partir de maintenant, dans la classe Main, nous pourrons appeler le routeur simplement avec `$this->router`.
 
-Dernière chose à faire, vérifier s'il reste des paramètres, si oui on passe les paramètres à la méthode :
+Maintenant, dans notre fonction start, après avoir nettoyé les urls en enlevant de le trailing /, nous allons vouloir initialiser notre routeur, en d'autre terme, nous allons vouloir parcourir l'ensemble de notre dossier Controllers et récupérer tous nos fichiers controllers, ensuite nous allons pour chaque fichier vérifier qu'il existe des méthodes avec notre attribut Route, si c'est le cas, nous voulons créer une nouvelle route et la stocker dans le router, ce qui fait que notre routeur va pouvoir trouver "tout seul" toutes les routes que nous avons définit dans nos controllers.
+
+Cette méthode de router est la plus dynamique, il en existe plusieurs, mais celle que nous voyons ensemble vous permet de définir des urls et route très facilement dans votre code.
+
+Tout d'abord, nous allons vouloir créer une méthode privée dans notre classe Main afin de séparer un peu notre code pour le rendre plus lisible, donc à la suite de la méthode start, créez cette nouvelle méthode :
 
 ```php
-if (method_exists($controller, $action)) {
-  // La méthode existe
-  (isset($params[0])) ? $controller->$action($params) : $controller->$action();
-} else {
-  http_response_code(404);
-  echo 'Page not found';
+private function initRouter(): void
+{
+  
 }
 ```
 
-Ici on utilise encore le ternaire pour vérifier s'il reste des paramètres, si oui, on appelle le controller, la méthode et on lui passe en paramètres le reste des paramètres, sinon on appelle juste le controller et la méthode sans rien lui passer de plus.
+Cette méthode va permettre d'initialiser notre routeur, donc premièrement dans cette nouvelle méthodes, nous allons vouloir récupérer tous les fichiers php se trouvant dans le dossier controllers, car pour rappel, nous fichier controllers seront seulement dans ce dossier, jamais dans un autre emplacement.
 
-Et voilà, nous routeur est fonctionnel (Un routeur n'est jamais finit, on peut toujours l'améliorer) ! Mais pour ce cours nous n'avons pas besoin de plus de vérification.
+Autre point à noter, nous voulons récupérer les fichier php à la racines du dossier Controller, mais également dans les sous-dossiers potentiels, nous allons donc utiliser la fonction glob :
 
-Nous n'allons plus toucher au routeur (donc au fichier Main.php).
+```php
+private function initRouter(): void
+{
+  // Récupère tous les chemin des fichiers présent à la racine du dossier Controllers
+  $files = glob(\dirname(__DIR__) . '/Controllers/*.php');
+  
+  // Récupère tous les chemin des fichiers présent dans les sous dossiers, 
+  // et vient également fusionner le tableau précédent avec les nouveaux résultats
+  $files = array_merge_recursive(glob(\dirname(__DIR__) . '/Controllers/**/*.php', GLOB_BRACE), $files);
+}
+```
 
+Maintenant, nous savons que dans notre variable $files, nous avons tous les fichier php qui sont dans le dossier Controller, et tout ça, de manière dynamique !
 
+Maintenant, nous avons besoin des classes de notre controller, pas seulement du chemin vers le fichier, nous allons donc devoir convertir le chemin de chaque fichier en namespace PHP afin de pouvoir récupérer les classes PHP et non les fichiers :
+
+```php
+// On boucle sur tout les chemins trouvés
+foreach ($files as $file) {
+ 		// On enlève le premier /
+   	$file = substr($file, 1);
+  	// On remplace les / par des \
+    $file = str_replace('/', '\\', $file);
+  	// On enlève l'extension .php du chemin
+    $file = substr($file, 0, -4);
+  	// On met le a de app en MAJUSCULE
+    $file = ucfirst($file);
+  
+ 		// On stock le namespace dans un nouveau tableau
+  	$classes[] = $file;
+}
+```
+
+Et grâce à ce code, vous avez maintenant un tableau **$classes** qui stocke tous les namespace et classe qui se trouve dans le dossier controllers.
+
+Maintenant que nous avons les classes, nous allons vouloir pour chaque classe récupérer toutes les méthodes qu'elle contient :
+
+```php
+// On boucle sur toutes les classs
+foreach ($classes as $class) {
+  // On récupère dans un tableau toutes les méthodes pour la classe
+  $methods = get_class_methods($class);
+}
+```
+
+Maintenant que nous avons récupéré les méthodes de chaque classe, nous allons vouloir récupérer l'attribut Route sur chaque méthode s'il existe, si oui, cela veut dire que nous voulons créer une route et l'ajouter dans le tableau de notre routeur pour l'enregistrer de manière dynamique :
+
+```php
+// On récupère dans un tableau toutes les classes attributs Route dans notre méthode
+$attributes = (new \ReflectionMethod($class, $method))->getAttributes(Route::class);
+// On boucle sur les attributs
+foreach ($attributes as $attribute) {
+  // On crée une instance de la classe Route avec les informations que nous avons récupérées
+  $route = $attribute->newInstance();
+  // On définit pour la route le controller
+  $route->setController($class);
+  // On définit pour la route la méthode à éxecuter
+  $route->setAction($method);
+  // On ajoute la route à notre routeur avec un tableau associatif
+  $this->router->addRoute([
+      'name' => $route->getName(),
+      'url' => $route->getUrl(),
+      'methods' => $route->getMethods(),
+      'controller' => $route->getController(),
+      'action' => $route->getAction(),
+  ]);
+}
+```
+
+Ce qui vous donne le code complet de la méthode initRouter suivant :
+
+```php
+private function initRouter(): void
+{
+    $files = glob(\dirname(__DIR__) . '/Controllers/*.php');
+
+    $files = array_merge_recursive(glob(\dirname(__DIR__) . '/Controllers/**/*.php', GLOB_BRACE), $files);
+
+    foreach ($files as $file) {
+      $file = substr($file, 1);
+      $file = str_replace('/', '\\', $file);
+      $file = substr($file, 0, -4);
+      $file = ucfirst($file);
+      $classes[] = $file;
+    }
+
+    foreach ($classes as $class) {
+        $methods = get_class_methods($class);
+        foreach ($methods as $method) {
+            $attributes = (new \ReflectionMethod($class, $method))->getAttributes(Route::class);
+            foreach ($attributes as $attribute) {
+                if ($attribute) {
+                    $route = $attribute->newInstance();
+                    $route->setController($class);
+                    $route->setAction($method);
+                    $this->router->addRoute([
+                        'name' => $route->getName(),
+                        'url' => $route->getUrl(),
+                        'methods' => $route->getMethods(),
+                        'controller' => $route->getController(),
+                        'action' => $route->getAction(),
+                    ]);
+                }
+            }
+        }
+    }
+}
+```
+
+Maintenant, il ne nous reste plus que 2 petites étapes afin de rendre notre routeur fonctionnel !
+
+Dans la fonction start de la classe Main, après avoir nettoyé les urls, nous voulons initialiser le routeur afin qu'il puisse enregistrer les routes de manière totalement dynamique, et enfin exécuter la méthode du routeur **handleRequest** qui va pouvoir vérifier si ce qu'envoie le navigateur correspond à une route et auquel cas, exécuter la bonne méthode dans le bon controller !
+
+```php
+public function start()
+{
+    session_start();
+
+    $uri = $_SERVER['REQUEST_URI'];
+
+    // On verifie que l'URI n'est pas vide
+    if (!empty($uri) && $uri != '/' && $uri[-1] === '/') {
+
+        // On enleve le dernier /
+        $uri = substr($uri, 0, -1);
+
+        // On envoie un code de redirection permanente
+        http_response_code(301);
+
+        // On redirige vers l'URL sans le dernier /
+        header('Location: ' . $uri);
+        exit;
+    }
+
+		// On initialise le routeur
+    $this->initRouter();
+
+		// On envoie les informations envoyées par le navigateur au routeur pour tester
+  	// Si nous avons une route qui correspond
+    $this->router->handleRequest($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+}
+```
+
+Et voilà, vous avez maintenant un routeur totalement dynamique, vous pouvez faire un test, créez un fichier MainController.php dans le dossier Controllers/Frontend et écrivez le code suivant :
+
+```php
+<?php
+  
+namespace App\Controllers\Frontend;
+
+use App\Core\Route;
+
+class MainController
+{
+  #[Route('hompage', '/', ['GET'])]
+  public function home(): void
+  {
+    echo 'Ça fonctionne';
+  }
+}
+```
+
+Maintenant, si vous allez sur la page d'accueil de votre site, vous pourrez voir votre message "Ça fonctionne", et simplement grâce à l'annotation au dessus de votre méthode, vous avez créer une route, donc une page. À partir de maintenant c'est comme ça que vous pourrez ajouter une page à votre application, une méthode dans un controller avec l'attribut Route.
+
+### Les paramètres
+
+Avant de créer victoire trop vite, il nous reste un petit soucis à gérer, le cas ou notre route doit envoyer une information dans l'url que nous voulons récupérer dans notre méthode.
+
+Imaginons la page qui va afficher un poste, l'url devrait être **/poste/details/1** le 1 étant l'id du poste à afficher sur la page, et en fonction de l'id que nous passons en paramètre, nous allons chercher en base le bon poste à afficher.
+
+Donc logiquement, dans un controlller, nous aurons la méthode suivante :
+
+```php
+#[Route('poste.show', '/postes/details/{id}', ['GET'])]
+public function show(int $id): void
+{
+  $poste = new PosteModel();
+  $poste->find($id);
+  
+  var_dump($poste);
+}
+```
+
+Ici nous voyons que pour fonctionner notre méthode doit avoir un paramètre $id, et nous voyons également dans l'url de la route que nous voulons un paramètre dynamique.
+
+C'est là où, pour le moment, nous avons un soucis avec notre routeur, le paramètre d'url {id}, nous ne le connaissons pas encore, nous savons seulement que ce sera un numéro (l'id d'un poste en bdd).
+
+C'est la que les regex entre jeux, en effet nous pouvons très bien dans l'url de notre définir un regex, pour dire qu'à l'endroit dans l'url ou nous voulons un id, nous attendons un chiffre, donc nous allons devoir écrire dans l'url le regex suivant :
+
+```php
+#[Route('poste.show', '/postes/details/([0-9]+)', ['GET'])]
+public function show(int $id): void
+{
+  $poste = new PosteModel();
+  $poste->find($id);
+  
+  var_dump($poste);
+}
+```
+
+Nous venons de stipuler notre url en disant quelle doit se terminer par un chiffre.
+
+Il ne reste seulement qu'à modifier légèrement notre méthode router dans la fonction handleRequest afin qu'il prenne compte les regex et envoie les paramètre aux méthodes quand il fait la comparaison des routes avec l'url du navigateur. 
+
+```php
+public function handleRequest($url, $method): void
+{
+    foreach ($this->routes as $route) {
+      	// On modifie la condition pour faire matcher les regex s'ils sont définit
+        if (preg_match("#^" . $route['url'] . "$#", $url, $matches) && in_array($method, $route['methods'])) {
+            $controllerName = $route['controller'];
+            $actionName = $route['action'];
+
+            $controller = new $controllerName();
+          	// On vient récupérer tous les paramètres d'url à faire passer à la méthode
+            $params = array_slice($matches, 1);
+          	// On exécute la fonction avec tous les paramètres 
+          	// d'url de manière chronnologique
+            $controller->$actionName(...$params);
+
+            return;
+        }
+    }
+
+    http_response_code(404);
+    echo 'Page non trouvée';
+}
+```
 
 ## Les Controllers
 
-Maintenant, on va s'intéresser à nos Controller.
+Maintenant, on va s'intéresser à nos Controllers.
 
 Comme pour les models, on peut très bien créer une classe parente, et des classes héritées, afin d'avoir une structure commune à tous nos Controllers tout en ayant des controllers séparés.
 
@@ -1524,7 +1759,7 @@ Dans notre classe Controller, nous allons créer des méthodes qui pourront êtr
 ```php
 <?php
 
-namespace App\Controllers;
+namespace App\Core;
 
 abstract class Controller
 {
@@ -1874,50 +2109,23 @@ Maintenant, on peut même ajouter un lien vers le détail des articles, par exem
 
 Maintenant, depuis la page de liste poste, vous pourriez accéder à la page de details d'un poste.
 
-Mais pour le moment, nous n'avons pas créer la méthode dans le controller PostesController pour afficher un seul poste (la méthode detail).
-
-Sauf qu'ici, nous allons avoir besoin de récupérer l'id du poste via l'URL et le passer à la méthode details, sauf que dans notre routeur, nous allons avoir un petit souci sur ces lignes :
+Pour ça, rien de plus simple, vous n'avez créer une méthode dans le fichier PosteController dans le dossier Controllers/Frontend et créer la méthode suivante :
 
 ```php
-if (method_exists($controller, $action)) {
-  // La méthode existe
-  (isset($params[0])) ? $controller->$action($params) : $controller->$action();
-}
-```
-
-Ici le problème est qu'une fois qu'on a récupéré le controller, la méthode, on stocke le reste des paramètres dans un tableau, or, nous aimerions envoyer le dernier paramètre de l'uricémie /postes/detail/1, en l'occurence le 1 (l'id du poste), soit envoyé au format int, donc nous allons modifier cette ligne :
-
-```php
-if (method_exists($controller, $action)) {
-  // La méthode existe
-  (isset($params[0])) ? call_user_func_array([$controller, $action], $params) : $controller->$action();
-}
-```
-
-Avec la méthode call_user_func_array() on va définir le controller ainsi que la méthode, et le reste des paramètres sera envoyé non plus sous forme de tableau, mais au format int ou string.
-
-Maintenant voyons si ça marche, aller dans le controller Postes et ajouter la méthode detail :
-
-```php
-/**
-* Retourne la page d'un poste
-*
-* @param integer $id
-* @return void
-*/
-public function detail(int $id)
+#[Route('poste.show', '/poste/details/([0-9]+)', ['GET'])]
+public function show(int $id): void
 {
-  // On instancie le model
-  $postesModel = new PostesModel;
-
-  // On cherche le poste correspondant
-  $poste = $postesModel->find($id);
-
-  $this->render('Postes/detail', ['poste' => $poste]);
+  $poste = new PosteModel();
+  
+  $this->render('Frontend/Postes/show', [
+    'poste' => $poste->find($id),
+  ]);
 }
 ```
 
-Ensuite il reste seulement à créer la vue :
+Et voilà ! La magie opère.
+
+Ensuite il reste seulement à créer la vue dans le dossier Views/Frontend/Postes/show.php :
 
 ```php+HTML
 <h1><?= $poste->titre ?></h1>
@@ -4775,3 +4983,72 @@ Et juste avec une petite touche de css pour avoir un bel affichage :
 ```
 
 Et Voilà, vous savez comment afficher une image en frontend !
+
+## Gérer les relations en frontend
+
+Nous avions mis en place une relation entre les postes et nos users, maintenant, nous allons vouloir afficher sur notre application les postes ainsi que le nom de l'auteur (de l'utilisateur qui est relié).
+
+Pour ce faire, nous allons devoir utiliser une nouvelle méthode de recherche spécifique au poste en récupérant la table postes mais également toutes les informations sur l'utilisateur qui est relié.
+
+En SQL, il faut simplement faire une jointure (INNER JOIN) :
+
+```sql
+SELECT * FROM postes INNER JOIN user ON postes.user_id = users.id
+```
+
+Cette commande permet de récupérer tous les postes ainsi que les informations de l'utilisateur (Nous avons joint la table users à la table poste grâce à la relation).
+
+Donc sachant notre commande SQL à exécuter, nous allons donc devoir rajouter une nouvelle méthode de recherche à PosteModel :
+
+```php
+/**
+* Cherche les postes avec les auteurs
+*
+* @return void
+*/
+public function findActiveWithAuthor()
+{
+  return $this->runQuery("SELECT * FROM $this->table INNER JOIN user ON $this->table.user_id = user.id WHERE actif = ?", [true])->fetchAll();
+}
+```
+
+Nous avons en plus rajouter une condition sur notre recherche, si nous voulons tous les postes, ou seulement les postes actifs.
+
+Maintenant, dans notre PosteController et dans la méthode index, nous avons simplement à utiliser cette nouvelle méthode de recherche pour récupérer toutes les données et les afficher sur notre vue :
+
+```php
+/**
+* Affiche la page de liste poste actif
+*
+* @return void
+*/
+public function index()
+{
+  // On insrtancie le Model Poste
+  $posteModel = new PosteModel();
+
+  // On va chercher les postes
+  $postes = $posteModel->findActiveWithAuthor();
+
+  $this->render('Postes/index', 'base', [
+    'postes' => $postes
+  ]);
+}
+```
+
+Il ne nous reste plus qu'à afficher sur la vue l'information sur l'utilisateur :
+
+```php+HTML
+<div class="card-body">
+  <h2 class="card-title">
+  <?= $poste->titre; ?>
+    </h2>
+    <p class="card-text text-muted">
+    <a href="/postes/auteur/<?= $poste->user_id ?>">
+    <?= $poste->nom; ?> <?= $poste->prenom; ?>
+      </a>
+      </p>
+      <p class="card-text"><?= $poste->description; ?></p>
+        <a href="/postes/details/<?= $poste->id; ?>" class="btn btn-primary">En savoir plus</a>
+</div>
+```
