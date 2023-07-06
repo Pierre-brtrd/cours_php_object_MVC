@@ -27,7 +27,7 @@ class PosteModel extends Model
     /**
      * @var DateTime
      */
-    protected Datetime $createdDAt;
+    protected ?Datetime $created_at = null;
 
     /**
      * @var bool
@@ -47,6 +47,7 @@ class PosteModel extends Model
     public function __construct()
     {
         $this->table = 'poste';
+        $this->className = __CLASS__;
     }
 
     /**
@@ -67,7 +68,7 @@ class PosteModel extends Model
      */
     public function findActiveWithLimit(int $max): mixed
     {
-        return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll();
+        return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll(\PDO::FETCH_CLASS, __CLASS__);
     }
 
     /**
@@ -159,7 +160,7 @@ class PosteModel extends Model
      */
     public function getCreatedDAt(): DateTime
     {
-        return $this->createdDAt;
+        return $this->created_at;
     }
 
     /**
@@ -171,7 +172,7 @@ class PosteModel extends Model
      */
     public function setCreatedDAt(DateTime $createdDAt): self
     {
-        $this->createdDAt = $createdDAt;
+        $this->created_at = $createdDAt;
 
         return $this;
     }
@@ -246,5 +247,12 @@ class PosteModel extends Model
         $this->image = $image;
 
         return $this;
+    }
+
+    function __set($name, $value)
+    {
+        if ($name == "created_at") {
+            $this->{$name} = new \DateTime($value);
+        }
     }
 }

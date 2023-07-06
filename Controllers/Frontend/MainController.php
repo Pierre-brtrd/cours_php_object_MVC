@@ -23,6 +23,8 @@ class MainController extends Controller
         // On va chercher toutes les annonces
         $postes = $posteModel->findActiveWithLimit(3);
 
+        var_dump($postes);
+
         $this->render('main/index', 'base', [
             'meta' => [
                 'title' => 'Homepage',

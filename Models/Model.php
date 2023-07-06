@@ -14,6 +14,8 @@ class Model extends Db
      */
     protected string $table;
 
+    protected ?string $className = null;
+
     /**
      * Instance de Db
      *
@@ -29,7 +31,7 @@ class Model extends Db
     public function findAll(): array
     {
         $query = $this->runQuery('SELECT * FROM ' . $this->table);
-        return $query->fetchAll();
+        return $query->fetchAll(\PDO::FETCH_CLASS, __CLASS__);
     }
 
     /**
