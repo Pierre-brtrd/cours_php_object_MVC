@@ -2,7 +2,6 @@
 
 namespace App\Controllers\Frontend;
 
-use App\Core\Form;
 use App\Core\Route;
 use App\Form\LoginForm;
 use App\Core\Controller;

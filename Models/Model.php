@@ -75,6 +75,16 @@ class Model extends Db
         return $this->runQuery("SELECT * FROM $this->table WHERE $strChamps", $valeurs)->fetchAll();
     }
 
+    public function paginate(string $sql, int $maxPerPage, int $page = 1, ?array $values = []): array
+    {
+        $offset = ($page - 1) * $maxPerPage;
+
+        $values['limit'] = $maxPerPage;
+        $values['offset'] = $offset;
+
+        return $this->runQuery("$sql LIMIT :limit OFFSET :offset", $values)->fetchAll();
+    }
+
     /**
      * Fonction de création d'une entrée en BDD
      *

@@ -20,9 +20,13 @@ class PostesController extends Controller
      *
      * @return void
      */
-    #[Route('poste.index', '/postes', ['GET'])]
-    public function index(): void
+    #[Route('poste.index', '/postes(\?page=\d+)?', ['GET'])]
+    public function index(?string $page = null): void
     {
+        $page = preg_match('/\d+/', $page ?: '', $matches) ? (int) $matches[0] : 1;
+
+        $postes = $this->posteModel->findAllWithPagination(6, $page, true);
+
         $this->render('postes/Index/index', 'base', [
             'meta' => [
                 'title' => 'Liste des postes',
@@ -30,7 +34,9 @@ class PostesController extends Controller
                 'description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
                 'og:description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
             ],
-            'postes' => $this->posteModel->findActiveWithAuthor(),
+            'postes' => $postes['postes'],
+            'page' => $page,
+            'totalPage' => $postes['pages'],
         ]);
     }
 

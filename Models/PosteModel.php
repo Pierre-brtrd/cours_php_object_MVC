@@ -39,7 +39,25 @@ class PosteModel extends Model
      */
     public function findActiveWithLimit(int $max): mixed
     {
-        return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll();
+        return $this->runQuery("SELECT * FROM $this->table WHERE actif = :active LIMIT :max OFFSET 0", ['active' => true, 'max' => $max])->fetchAll();
+    }
+
+    public function findAllWithPagination(int $maxPerPage, int $page = 1, bool $actif = false): array
+    {
+        $sql = "SELECT p.*, u.nom, u.prenom, u.email FROM $this->table p INNER JOIN user u ON p.userId = u.id";
+
+        if ($actif) {
+            $sql .= " WHERE actif = :actif";
+        }
+
+        $sql .= " ORDER BY created_at DESC";
+
+        $totalPage = ceil($this->runQuery($sql, $actif ? ['actif' => true] : null)->rowCount() / $maxPerPage);
+
+        return [
+            'pages' => $totalPage,
+            'postes' => $this->paginate($sql, $maxPerPage, $page, $actif ? ['actif' => true] : null)
+        ];
     }
 
     /**

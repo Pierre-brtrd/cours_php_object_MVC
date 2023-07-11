@@ -20,8 +20,20 @@
                             <li class="nav-item">
                                 <p class="navbar-text mb-0">User : <?= $_SESSION['user']['prenom'] ?> | </p>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/admin">Admin</a>
+                            <li class="nav-item ms-2">
+                                <div class="btn-group">
+                                    <a class="btn btn-light" href="/admin">
+                                        Admin
+                                    </a>
+                                    <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdown-admin">
+                                        <a class="dropdown-item" href="/admin/users">Users</a>
+                                        <hr class="dropdown-divider">
+                                        <a class="dropdown-item" href="/admin/postes">Postes</a>
+                                    </div>
+                                </div>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">

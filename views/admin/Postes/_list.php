@@ -28,3 +28,5 @@
         </div>
     <?php endforeach; ?>
 </div>
+
+<?php include_once ROOT . '/Views/postes/index/_pagination.php'; ?>

@@ -16,18 +16,24 @@ class PostesController extends Controller
     ) {
     }
 
-    #[Route('admin.poste.index', '/admin/postes', ['GET'])]
-    public function postes(): void
+    #[Route('admin.poste.index', '/admin/postes(\?page=\d+)?', ['GET'])]
+    public function postes(?string $page = null): void
     {
         $this->isAdmin();
 
+        $page = preg_match('/\d+/', $page ?: '', $matches) ? (int) $matches[0] : 1;
+
+        $postes = $this->posteModel->findAllWithPagination(6, $page);
         // On appelle la vue avec la fonction render en lui passant les données
         $this->render('admin/Postes/index', 'admin', [
             'meta' => [
                 'title' => 'Admin postes'
             ],
-            'postes' => $this->posteModel->findAll(),
+            'postes' => $postes['postes'],
             'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
+            'page' => $page,
+            'totalPage' =>  $postes['pages'],
+            'admin' => true,
         ]);
     }
 
