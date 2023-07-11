@@ -28,7 +28,7 @@
                             <a class="nav-link" href="/user/profil">Profil</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger" href="/logout">Déconnexion</a>
+                            <a class="btn btn-danger" href="/logout">Déconnexion</a>
                         </li>
                     <?php else : ?>
                         <li class="nav-item">

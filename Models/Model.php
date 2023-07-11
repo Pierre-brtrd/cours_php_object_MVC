@@ -93,7 +93,7 @@ class Model extends Db
 
         // On boucle sur l'objet pour récupérer tous les champs et les valeurs
         foreach ($this as $champ => $valeur) {
-            if ($valeur !== null && $champ !== 'table') {
+            if ($valeur !== null && $champ !== 'table' && $champ !== 'database') {
                 // actif
                 $champs[] = $champ;
 
@@ -135,7 +135,7 @@ class Model extends Db
 
         // On boucle sur l'objet pour récupérer tous les champs et les valeurs
         foreach ($this as $champ => $valeur) {
-            if ($valeur !== null && $champ !== 'table' && $champ !== 'id') {
+            if ($valeur !== null && $champ !== 'table' && $champ !== 'database' && $champ !== 'id') {
                 // actif
                 $champs[] = "$champ = :$champ";
 

@@ -3,7 +3,7 @@
         <div class="col-md-4">
             <div class="card <?= $poste->actif ? 'border-success' : 'border-danger'; ?>">
                 <?php if ($poste->image) : ?>
-                    <img class="card-img-top" src="/uploads/postes/<?= $poste->image; ?>" loading="lazy">
+                    <img class="card-img-top" src="/images/poste/<?= $poste->image; ?>" loading="lazy">
                 <?php endif; ?>
                 <div class="card-body">
                     <h2 class="card-title"><?= $poste->titre; ?></h2>

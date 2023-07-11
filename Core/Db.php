@@ -47,10 +47,14 @@ class Db extends PDO
      */
     public static function getInstance(): self
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
+        // On vérifie si aucune instance n'existe pas déjà
+        if (self::$instance === null) {
+            // Si elle n'existe pas, on créé l'instance pour créer 
+            // la connexion en BDD
+            self::$instance = new Db();
         }
 
+        // On renvoie l'instance (La connexion en BDD)
         return self::$instance;
     }
 }

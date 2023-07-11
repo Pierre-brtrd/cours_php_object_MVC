@@ -16,7 +16,7 @@ class Form
      * @param array $champsObligatoires Tableau index avec le nom des champs obligatoire
      * @return boolean Retourne False si formulaire invalide sinon true
      */
-    public static function validate(array $form, array $champsObligatoires): bool
+    public function validate(array $form, array $champsObligatoires): bool
     {
         // On parcout le tableau de champ obligatoire
         foreach ($champsObligatoires as $champ) {
@@ -64,7 +64,7 @@ class Form
      * @param array $attributs Tableau associatif avec les attributs HTML et les valeurs
      * @return self
      */
-    public function startGroup(array $attributs = []): self
+    public function startDiv(array $attributs = []): self
     {
         $this->formCode .= "<div";
 
@@ -79,7 +79,7 @@ class Form
      *
      * @return self
      */
-    public function endGroup(): self
+    public function endDiv(): self
     {
         $this->formCode .= '</div>';
 
@@ -94,7 +94,7 @@ class Form
      * @param array $attributs
      * @return self
      */
-    public function addLabelFor(string $for, string $text, array $attributs = []): self
+    public function addLabel(string $for, string $text, array $attributs = []): self
     {
         $this->formCode .= "<label for=\"$for\"";
 
@@ -186,9 +186,9 @@ class Form
         return $this;
     }
 
-    public function addImage(string $path, ?array $attributs = []): self
+    public function addImage(?string $path, ?array $attributs = []): self
     {
-        if (file_exists(ROOT . '/public/' . $path)) {
+        if ($path && file_exists(ROOT . '/public/' . $path)) {
             $this->formCode .= "<img src=\"$path\"";
 
             $this->formCode .= $attributs ? $this->addAttributes($attributs) . '>' : '>';
