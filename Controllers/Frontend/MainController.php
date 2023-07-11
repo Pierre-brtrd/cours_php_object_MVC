@@ -4,6 +4,7 @@ namespace App\Controllers\Frontend;
 
 use App\Core\Form;
 use App\Core\Route;
+use App\Form\LoginForm;
 use App\Core\Controller;
 use App\Models\UserModel;
 use App\Models\PosteModel;
@@ -37,14 +38,16 @@ class MainController extends Controller
     #[Route('login', '/login', ['GET', 'POST'])]
     public function login(): void
     {
-        if (Form::validate($_POST, ['email', 'password'])) {
+        $form = new LoginForm();
+
+        if ($form->validate($_POST, ['email', 'password'])) {
             // Le formulaire est valide
             // On va chercher dans la base de données l'utilisateur l'email entrée
-            $userModel = new UserModel();
-            $userArray = $userModel->findOneByEmail(strip_tags($_POST['email']));
+
+            $user = (new UserModel())->findOneByEmail(strip_tags($_POST['email']));
 
             // Si l'utilisateur n'existe pas
-            if (!$userArray) {
+            if (!$user) {
                 // On envoi un message de session erreur
                 $_SESSION['error'] = "L'adresse email et/ou le mot de passe est incorrect";
                 header('Location: /login');
@@ -52,18 +55,14 @@ class MainController extends Controller
             }
 
             // L'utilisateur existe
-            $userArray->roles = $userArray->roles  ? json_decode($userArray->roles) : null;
-            $user = $userModel->hydrate($userArray);
+            $user = (new UserModel)->hydrate($user);
 
             /**
              * On vérifie si le password est correct
              * 
              * @var UserModel $user
              */
-            if (
-                password_verify($_POST['password'], $user->getPassword())
-                && hash_equals($_POST['token'], $_SESSION['token'])
-            ) {
+            if (password_verify($_POST['password'], $user->getPassword())) {
                 // Le mot de passe est bon
                 // On crée la session
                 $user->setSession();
@@ -75,30 +74,6 @@ class MainController extends Controller
                 exit();
             }
         }
-
-        $form = new Form();
-        $form->startForm('POST', '', ['class' => 'form card p-3'])
-            ->startGroup(['class' => 'form-group'])
-            ->addLabelFor('email', 'Email :', ['class' => 'form-label'])
-            ->addInput('email', 'email', [
-                'class' => 'form-control',
-                'id' => 'email',
-                'required' => true
-            ])
-            ->endGroup()
-            ->startGroup(['class' => 'form-group mt-2'])
-            ->addLabelFor('password', 'Mot de passe :', ['class' => 'form-label'])
-            ->addInput('password', 'password', [
-                'class' => 'form-control',
-                'id' => 'password',
-                'required' => true
-            ])
-            ->endGroup()
-            ->addInput('hidden', 'token', [
-                'value' => $_SESSION['token'] = bin2hex(random_bytes(35)),
-            ])
-            ->addButton('Me connecter', ['class' => 'btn btn-primary mt-4 mx-auto'])
-            ->endForm();
 
         $this->render('users/login', 'base', [
             'meta' => [

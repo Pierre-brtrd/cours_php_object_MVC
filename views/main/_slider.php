@@ -12,7 +12,7 @@
         <?php foreach ($postes as $key => $poste) : ?>
             <div class="carousel-item <?= $key === array_key_first($postes) ? 'active' : '' ?>">
                 <?php if ($poste->image) : ?>
-                    <img src="/uploads/postes/<?= $poste->image; ?>" class="img-carousel d-block" alt="<?= $poste->titre; ?>" loading="lazy" />
+                    <img src="/images/poste/<?= $poste->image; ?>" class="img-carousel d-block" alt="<?= $poste->titre; ?>" loading="lazy" />
                 <?php else : ?>
                     <img src="https://fakeimg.pl/1200x600" class="img-carousel d-block w-100">
                 <?php endif; ?>

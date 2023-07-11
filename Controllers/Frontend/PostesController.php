@@ -2,8 +2,6 @@
 
 namespace App\Controllers\Frontend;
 
-use DateTime;
-use App\Core\Form;
 use App\Core\Route;
 use App\Core\Controller;
 use App\Models\UserModel;

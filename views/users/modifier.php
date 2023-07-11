@@ -1,16 +1,11 @@
-<section>
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-6 m-auto">
-                <h1 class="text-center">Modifier un utilisateur</h1>
-                <? if (!empty($_SESSION['error'])) : ?>
-                    <div class="alert alert-danger" role="alert">
-                        <?php echo $_SESSION['error'];
-                        unset($_SESSION['error']) ?>
-                    </div>
-                <? endif; ?>
-                <?= $form; ?>
-            </div>
+<section class="container mt-4">
+    <h1 class="text-center">Modifier un utilisateur</h1>
+    <? if (!empty($_SESSION['error'])) : ?>
+        <div class="alert alert-danger" role="alert">
+            <?php echo $_SESSION['error'];
+            unset($_SESSION['error']) ?>
         </div>
-    </div>
+    <? endif; ?>
+    <?= $form; ?>
+    <a href="/admin/users" class="btn btn-primary mt-4">Retour à la liste</a>
 </section>

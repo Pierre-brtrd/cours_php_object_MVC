@@ -59,13 +59,13 @@ class PostesController extends Controller
                 ->setTitre($titre)
                 ->setDescription($description)
                 ->setActif($actif)
-                ->setUserId($_SESSION['LOGGED_USER']['id'])
+                ->setUserId($_SESSION['user']['id'])
                 ->setImage($_FILES['image'])
                 ->create();
 
-            $_SESSION['messages']['success'] = "Article créé avec succès";
+            $_SESSION['message'] = "Article créé avec succès";
 
-            header('Location: /admin/articles');
+            header('Location: /admin/postes');
             exit();
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['error'] = 'Veuillez remplir tous les champs obligatoires';
