@@ -947,7 +947,7 @@ Concrètement, comment notre application va fonctionner avec le MVC ?
 
 Voici un petit schéma pour mieux comprendre :
 
-![schéma-MVC](/Users/pierre/Formations/Visuel Cours/schéma-MVC.png)
+![schéma-MVC](./public/images/schema-MVC.png)
 
 Concrètement, comment ça marche ?
 
@@ -957,9 +957,7 @@ Ensuite le __controlleur__ va traiter les informations : aller chercher dans les
 
 Ensuite le contrôleur va envoyer les informations à une __vue__ qui doit générer le HTML, et rendre la page au client (navigateur).
 
-Voici comment fonction le MVC.
-
-
+Voici comment fonctionne le MVC.
 
 ## L'architecture dossier
 
