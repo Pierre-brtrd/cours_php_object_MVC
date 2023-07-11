@@ -16,7 +16,7 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     <?php if (isset($_SESSION['user']) && !empty($_SESSION['user']['id'])) : ?>
-                        <?php if (in_array('ROLE_ADMIN', json_decode($_SESSION['user']['roles']))) : ?>
+                        <?php if (in_array('ROLE_ADMIN', $_SESSION['user']['roles'])) : ?>
                             <li class="nav-item">
                                 <p class="navbar-text mb-0">User : <?= $_SESSION['user']['prenom'] ?> | </p>
                             </li>

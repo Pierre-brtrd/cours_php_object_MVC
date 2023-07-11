@@ -16,15 +16,8 @@ class MainController extends Controller
      * @return void
      */
     #[Route('homepage', '/', ['GET'])]
-    public function index()
+    public function index(): void
     {
-        $posteModel = new PosteModel();
-
-        // On va chercher toutes les annonces
-        $postes = $posteModel->findActiveWithLimit(3);
-
-        var_dump($postes);
-
         $this->render('main/index', 'base', [
             'meta' => [
                 'title' => 'Homepage',
@@ -32,7 +25,7 @@ class MainController extends Controller
                 'description' => 'Vous cherchez un emploi ? Vous êtes sur la bonne application, retrouvez toutes les offres d\'emplois disponible sur le site.',
                 'og:description' => 'Vous cherchez un emploi ? Vous êtes sur la bonne application, retrouvez toutes les offres d\'emplois disponible sur le site.',
             ],
-            'postes' => $postes
+            'postes' => (new PosteModel())->findActiveWithLimit(3),
         ]);
     }
 
@@ -42,7 +35,7 @@ class MainController extends Controller
      * @return void
      */
     #[Route('login', '/login', ['GET', 'POST'])]
-    public function login()
+    public function login(): void
     {
         if (Form::validate($_POST, ['email', 'password'])) {
             // Le formulaire est valide
@@ -122,7 +115,7 @@ class MainController extends Controller
      * @return void
      */
     #[Route('logout', '/logout', ['GET'])]
-    public function logout()
+    public function logout(): void
     {
         unset($_SESSION['user']);
 
@@ -133,7 +126,7 @@ class MainController extends Controller
         exit();
     }
 
-    public function error(int $statusCode)
+    public function error(int $statusCode): void
     {
         $this->render('error/error', 'base', [
             'code' => $statusCode,

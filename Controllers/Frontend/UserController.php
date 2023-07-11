@@ -15,7 +15,7 @@ class UserController extends Controller
      * @return void
      */
     #[Route('user.register', '/register', ['GET', 'POST'])]
-    public function register()
+    public function register(): void
     {
         // Vérification si le formulaire est valide
         if (

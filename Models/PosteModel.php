@@ -9,45 +9,16 @@ use DateTime;
  */
 class PosteModel extends Model
 {
-    /**
-     * @var int
-     */
-    protected int $id;
-
-    /**
-     * @var string
-     */
-    protected string $titre;
-
-    /**
-     * @var string
-     */
-    protected string $description;
-
-    /**
-     * @var DateTime
-     */
-    protected ?Datetime $created_at = null;
-
-    /**
-     * @var bool
-     */
-    protected bool $actif;
-
-    /**
-     * @var int
-     */
-    protected int $userId;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $image;
-
-    public function __construct()
-    {
+    public function __construct(
+        protected ?int $id = null,
+        protected ?string $titre = null,
+        protected ?string $description = null,
+        protected ?Datetime $created_at = null,
+        protected ?bool $actif = null,
+        protected ?int $userId = null,
+        protected ?string $image = null
+    ) {
         $this->table = 'poste';
-        $this->className = __CLASS__;
     }
 
     /**
@@ -68,7 +39,7 @@ class PosteModel extends Model
      */
     public function findActiveWithLimit(int $max): mixed
     {
-        return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll(\PDO::FETCH_CLASS, __CLASS__);
+        return $this->runQuery("SELECT * FROM $this->table WHERE actif = ? LIMIT ?", [true, $max])->fetchAll();
     }
 
     /**
@@ -228,7 +199,7 @@ class PosteModel extends Model
     /**
      * Get the value of image
      *
-     * @return string
+     * @return ?string
      */
     public function getImage(): ?string
     {
@@ -238,21 +209,22 @@ class PosteModel extends Model
     /**
      * Set the value of image
      *
-     * @param string $image
+     * @param ?array $image
      *
      * @return self
      */
-    public function setImage(string $image): self
+    public function setImage(null|array|string $image, bool $remove = false): self
     {
-        $this->image = $image;
+        if ($image && is_array($image)) {
+            $imageName = $this->uploadImage($image, $this->image ? true : $remove);
+        } elseif (is_string($image)) {
+            $imageName = $image;
+        } else {
+            $imageName = null;
+        }
+
+        $this->image = $imageName;
 
         return $this;
-    }
-
-    function __set($name, $value)
-    {
-        if ($name == "created_at") {
-            $this->{$name} = new \DateTime($value);
-        }
     }
 }

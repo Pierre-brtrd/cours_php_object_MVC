@@ -4,38 +4,14 @@ namespace App\Models;
 
 class UserModel extends Model
 {
-    /**
-     * @var int
-     */
-    protected int $id;
-
-    /**
-     * @var string
-     */
-    protected string $nom;
-
-    /**
-     * @var string
-     */
-    protected string $prenom;
-
-    /**
-     * @var string
-     */
-    protected string $email;
-
-    /**
-     * @var string
-     */
-    protected string $password;
-
-    /**
-     * @var array
-     */
-    protected array $roles;
-
-    public function __construct()
-    {
+    public function __construct(
+        protected ?int $id = null,
+        protected ?string $nom = null,
+        protected ?string $prenom = null,
+        protected ?string $email = null,
+        protected ?string $password = null,
+        protected ?array $roles = null
+    ) {
         $class = str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
         $this->table = strtolower(str_replace('Model', '', $class));
     }
@@ -63,7 +39,7 @@ class UserModel extends Model
             'prenom' => $this->prenom,
             'nom' => $this->nom,
             'email' => $this->email,
-            'roles' => json_encode($this->roles),
+            'roles' => $this->roles,
         ];
     }
 
@@ -190,30 +166,28 @@ class UserModel extends Model
     /**
      * Get the value of roles
      *
-     * @return array
+     * @return ?array
      */
-    public function getRoles(): array
+    public function getRoles(): ?array
     {
-        $roles =  $this->roles;
+        $this->roles[] = "ROLE_USER";
 
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return array_unique($this->roles);
     }
 
     /**
      * Set the value of roles
      *
-     * @param array $roles
+     * @param null|string|array $roles
      *
-     * @return UserModel
+     * @return self
      */
-    public function setRoles(?array $roles): self
+    public function setRoles(null|string|array $roles): self
     {
-        if ($roles !== null) {
-            $this->roles = $roles;
+        if (is_string($roles)) {
+            $this->roles = json_decode($roles ?: '[]');
         } else {
-            $this->roles = $this->getRoles();
+            $this->roles = $roles;
         }
 
         return $this;

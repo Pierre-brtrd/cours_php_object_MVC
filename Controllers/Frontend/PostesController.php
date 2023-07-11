@@ -23,11 +23,8 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('poste.index', '/postes', ['GET'])]
-    public function index()
+    public function index(): void
     {
-        // On va chercher les postes
-        $postes = $this->posteModel->findActiveWithAuthor();
-
         $this->render('postes/Index/index', 'base', [
             'meta' => [
                 'title' => 'Liste des postes',
@@ -35,7 +32,7 @@ class PostesController extends Controller
                 'description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
                 'og:description' => 'Découvrez tous les postes disponible. Trouvez un emploi facilement grâce à toutes nos offres.',
             ],
-            'postes' => $postes
+            'postes' => $this->posteModel->findActiveWithAuthor(),
         ]);
     }
 
@@ -46,7 +43,7 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('poste.show', '/postes/details/([0-9]+)', ['GET'])]
-    public function details(int $id)
+    public function details(int $id): void
     {
         // On recherche une annonce
         $poste = $this->posteModel->findOneActiveWithAuthor($id);
@@ -81,7 +78,7 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('poste.show', '/postes/auteur/([0-9]+)', ['GET'])]
-    public function auteur(int $id)
+    public function auteur(int $id): void
     {
         $postes = $this->posteModel->findBy(['userId' => $id]);
         $auteur = $this->userModel->find($id);

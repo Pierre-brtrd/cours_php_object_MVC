@@ -20,4 +20,19 @@ abstract class Controller
         // Template de page
         require_once ROOT . '/Views/' . $template . '.php';
     }
+
+    protected function isAdmin()
+    {
+        // On vérifie si on est connecté et si role Admin pour l'utilisateur
+        if (isset($_SESSION['user']) && in_array('ROLE_ADMIN', $_SESSION['user']['roles'])) {
+            // On est admin
+            return true;
+        } else {
+            // Pas admin, alors redirection vers page de connexion
+            http_response_code(403);
+            $_SESSION['error'] = "Vous n'avez pas accès à cette zone, connecté avec un compte Admin";
+            header('Location: /login');
+            exit;
+        }
+    }
 }
