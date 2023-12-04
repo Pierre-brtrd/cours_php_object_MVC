@@ -94,10 +94,10 @@ class PostesController extends Controller
 
         return $this->render('Postes/auteur', 'base', [
             'meta' => [
-                'title' => "Liste des poste de $auteur->prenom $auteur->nom",
-                'og:title' => "Liste des poste de $auteur->prenom $auteur->nom | My app PHP Object",
-                'description' => "Découvrez les postes de $auteur->prenom $auteur->nom, trouvez un emploi grâce à $auteur->prenom $auteur->nom.",
-                'og:description' => "Découvrez les postes de $auteur->prenom $auteur->nom, trouvez un emploi grâce à $auteur->prenom $auteur->nom.",
+                'title' => "Liste des poste de {$auteur->getPrenom()} {$auteur->getNom()}",
+                'og:title' => "Liste des poste de {$auteur->getPrenom()} {$auteur->getNom()} | My app PHP Object",
+                'description' => "Découvrez les postes de {$auteur->getPrenom()} {$auteur->getNom()}, trouvez un emploi grâce à {$auteur->getPrenom()} {$auteur->getNom()}.",
+                'og:description' => "Découvrez les postes de {$auteur->getPrenom()} {$auteur->getNom()}, trouvez un emploi grâce à {$auteur->getPrenom()} {$auteur->getNom()}.",
             ],
             'postes' => $postes,
             'auteur' => $auteur

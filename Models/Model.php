@@ -74,7 +74,9 @@ class Model extends Db
 
         // On execute la requetes SQL
 
-        return $this->runQuery("SELECT * FROM $this->table WHERE $strChamps", $valeurs)->fetchAll();
+        return $this->fetchHydrate(
+            $this->runQuery("SELECT * FROM $this->table WHERE $strChamps", $valeurs)->fetchAll()
+        );
     }
 
     public function paginate(string $sql, int $maxPerPage, int $page = 1, ?array $values = []): array

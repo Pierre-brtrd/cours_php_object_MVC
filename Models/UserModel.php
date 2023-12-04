@@ -24,7 +24,9 @@ class UserModel extends Model
      */
     public function findOneByEmail(string $email): mixed
     {
-        return $this->runQuery("SELECT * FROM $this->table WHERE email = ?", [$email])->fetch();
+        return $this->fetchHydrate(
+            $this->runQuery("SELECT * FROM $this->table WHERE email = ?", [$email])->fetch()
+        );
     }
 
     /**

@@ -53,9 +53,6 @@ class MainController extends Controller
                 return $this->redirect('login');
             }
 
-            // L'utilisateur existe
-            $user = (new UserModel)->hydrate($user);
-
             /**
              * On vérifie si le password est correct
              * 
