@@ -20,11 +20,11 @@ class UserController extends Controller
      * @return void
      */
     #[Route('admin.user.index', '/admin/users', ['GET'])]
-    public function user(): void
+    public function user(): string
     {
         $this->isAdmin();
         // On appelle la vue avec la fonction render en lui passant les données
-        $this->render('admin/users', 'admin', [
+        return $this->render('admin/users', 'admin', [
             'meta' => [
                 'title' => 'Admin des users'
             ],
@@ -34,7 +34,7 @@ class UserController extends Controller
     }
 
     #[Route('admin.user.edit', '/admin/user/edit/([0-9]+)', ['GET', 'POST'])]
-    public function edit(int $id): void
+    public function edit(int $id): string
     {
         // On vérifie si l'utilisateur est connecté
         $this->isAdmin();
@@ -47,19 +47,19 @@ class UserController extends Controller
         // Si l'utilisateur n'existe pas, on redirige sur la liste des annonces
         if (!$user) {
             http_response_code(404);
-            $_SESSION['error'] = "L'utilisateur recherché n'existe pas";
-            header('Location: /admin/users');
-            exit;
+            $this->addFlash('danger', "L'utilisateur recherché n'existe pas");
+
+            return $this->redirect('admin.user.index');
         }
 
         // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
-        if ($user->id != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
-            $_SESSION['error'] = "Vous n'avez pas accès à cet utilisateur";
-            header('Location: /admin/users');
-            exit;
+        if ($user->getId() != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+            $this->addFlash('danger', "Vous n'avez pas accès à cet utilisateur");
+
+            return $this->redirect('admin.user.index');
         }
 
-        $form = new UserForm($this->userModel->hydrate($user));
+        $form = new UserForm($user);
         // On traire le formulaire
         if ($form->validate($_POST, ['email'])) {
             // Le formulaire est valide
@@ -78,19 +78,18 @@ class UserController extends Controller
                     ->setRoles("[\"$roles\"]")
                     ->update();
 
-                $_SESSION['messages']['success'] = 'Utilisateur modifié avec succès';
+                $this->addFlash('success', "Utilisateur modifié avec succès");
 
-                header('Location: /admin/users');
-                exit();
+                return $this->redirect('admin.user.index');
             } else {
-                $_SESSION['messages']['error'] = "Veuillez rentrer un email valide";
+                $this->addFlash('danger', "Veuillez rentrer un email valide");
             }
         } elseif ($_SERVER['REQUEST_METHOD'] === "POST") {
-            $_SESSION['messages']['error'] = "Veuillez remplir tous les champs obligatoires";
+            $this->addFlash('danger', "Veuillez remplir tous les champs obligatoires");
         }
 
         // On envoie à la vue
-        $this->render('users/modifier', 'base', [
+        return $this->render('users/modifier', 'base', [
             'form' => $form->create(),
             'meta' => [
                 'title' => 'Modifier un utitilisateur'
@@ -109,11 +108,20 @@ class UserController extends Controller
         $this->isAdmin();
 
         if (hash_equals($_POST['token'], $_SESSION['token']) && !empty($_POST['id'])) {
-            $user = new UserModel();
-            $user->delete($_POST['id']);
-            $_SESSION['message'] = "Utilisateur supprimé avec succés";
+            $user = $this->userModel->find($_POST['id']);
+
+            if ($user) {
+                if ($user->isAuthor()) {
+                    $this->addFlash('danger', "Vous ne pouvez pas supprimer un utilisateur qui a des postes");
+                } else {
+                    $user->delete();
+                    $this->addFlash('success', "Utilisateur supprimé avec succés");
+                }
+            } else {
+                $this->addFlash('danger', "L'utilisateur n'existe pas");
+            }
         } else {
-            $_SESSION['error'] = "Une erreur est survenue";
+            $this->addFlash('danger', "Une erreur est survenue");
         }
 
         header('Location: ' . $_SERVER['HTTP_REFERER']);

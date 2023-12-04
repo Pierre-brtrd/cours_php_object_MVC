@@ -17,7 +17,7 @@ class PostesController extends Controller
     }
 
     #[Route('admin.poste.index', '/admin/postes(\?page=\d+)?', ['GET'])]
-    public function postes(?string $page = null): void
+    public function postes(?string $page = null): string
     {
         $this->isAdmin();
 
@@ -25,7 +25,7 @@ class PostesController extends Controller
 
         $postes = $this->posteModel->findAllWithPagination(6, $page);
         // On appelle la vue avec la fonction render en lui passant les données
-        $this->render('admin/Postes/index', 'admin', [
+        return $this->render('admin/Postes/index', 'admin', [
             'meta' => [
                 'title' => 'Admin postes'
             ],
@@ -43,7 +43,7 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('admin.poste.create', '/admin/poste/create', ['GET', 'POST'])]
-    public function ajouter(): void
+    public function ajouter(): string
     {
         // On vérifie si l'utilisateur est connecté
         $this->isAdmin();
@@ -69,18 +69,17 @@ class PostesController extends Controller
                 ->setImage($_FILES['image'])
                 ->create();
 
-            $_SESSION['message'] = "Article créé avec succès";
+            $this->addFlash('success', 'Article créé avec succès');
 
-            header('Location: /admin/postes');
-            exit();
+            return $this->redirect('admin.poste.index');
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $_SESSION['error'] = 'Veuillez remplir tous les champs obligatoires';
+            $this->addFlash('danger', 'Le formulaire est incomplet');
 
             $titre = (isset($_POST['titre'])) ? strip_tags($_POST['titre']) : '';
             $description = (isset($_POST['description'])) ? strip_tags($_POST['description']) : '';
         }
 
-        $this->render('postes/ajouter', 'base', [
+        return $this->render('postes/ajouter', 'base', [
             'meta' => [
                 'title' => 'Créer un poste',
                 'description' => 'Créez un poste et proposez une offre d\'emploi pour trouver de bon profil',
@@ -98,7 +97,7 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('admin.poste.edit', '/admin/poste/edit/([0-9]+)', ['GET', 'POST'])]
-    public function modifier(string|int $id): void
+    public function modifier(string|int $id): string
     {
         // On vérifie si l'utilisateur est connecté
         $this->isAdmin();
@@ -111,16 +110,16 @@ class PostesController extends Controller
         // Si l'annonce n'existe pas, on redirige sur la liste des annonces
         if (!$poste) {
             http_response_code(404);
-            $_SESSION['error'] = "Le poste recherché n'existe pas";
-            header('Location: /postes');
-            exit;
+            $this->addFlash('danger', "Le poste recherché n'existe pas");
+
+            return $this->redirect('poste.index');
         }
 
         // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
         if ($poste->userId != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
-            $_SESSION['error'] = "Vous n'avez pas accès à ce poste";
-            header('Location: /postes');
-            exit;
+            $this->addFlash('danger', 'Vous n\'avez pas accès à ce poste');
+
+            return $this->redirect('poste.index');
         }
 
         $userArr = [];
@@ -161,18 +160,17 @@ class PostesController extends Controller
             $posteUpdate->update();
 
             // On redirige
-            $_SESSION['message'] = "Poste modifié avec succès";
+            $this->addFlash('success', 'Poste modifié avec succès');
 
-            header('Location: /admin/postes');
-            exit();
+            return $this->redirect('admin.poste.index');
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $_SESSION['error'] = !empty($_POST) ? "Le formulaire est incomplet" : '';
+            $this->addFlash('danger', 'Le formulaire est incomplet');
             $titre = (isset($_POST['titre'])) ? strip_tags($_POST['titre']) : '';
             $description = (isset($_POST['description'])) ? strip_tags($_POST['description']) : '';
         }
 
         // On envoie à la vue
-        $this->render('postes/modifier', 'base', [
+        return $this->render('postes/modifier', 'base', [
             'meta' => [
                 'title' => "Modifier le poste $poste->titre",
                 'description' => 'Modifiez un poste et proposez une offre d\'emploi pour trouver de bon profil',
@@ -199,9 +197,9 @@ class PostesController extends Controller
                 ->hydrate($poste)
                 ->delete();
 
-            $_SESSION['message'] = "Poste supprimé avec succés";
+            $this->addFlash('success', 'Poste supprimé avec succès');
         } else {
-            $_SESSION['error'] = "Une erreur est survenue";
+            $this->addFlash('danger', 'Une erreur est survenue');
         }
 
         header('Location: ' . $_SERVER['HTTP_REFERER']);

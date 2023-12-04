@@ -44,6 +44,8 @@ class Main
             $classes[] = $this->convertFileToNamespace($file);
         }
 
+        unset($_SESSION['routes']);
+
         foreach ($classes as $class) {
             $methods = get_class_methods($class);
             foreach ($methods as $method) {
@@ -53,13 +55,17 @@ class Main
                         $route = $attribute->newInstance();
                         $route->setController($class);
                         $route->setAction($method);
-                        $this->router->addRoute([
+                        $routeArr = [
                             'name' => $route->getName(),
                             'url' => $route->getUrl(),
                             'methods' => $route->getMethods(),
                             'controller' => $route->getController(),
                             'action' => $route->getAction(),
-                        ]);
+                        ];
+
+                        $this->router->addRoute($routeArr);
+
+                        $_SESSION['routes'][] = $routeArr;
                     }
                 }
             }

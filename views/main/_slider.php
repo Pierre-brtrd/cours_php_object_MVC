@@ -11,15 +11,15 @@
     <div class="carousel-inner">
         <?php foreach ($postes as $key => $poste) : ?>
             <div class="carousel-item <?= $key === array_key_first($postes) ? 'active' : '' ?>">
-                <?php if ($poste->image) : ?>
-                    <img src="/images/poste/<?= $poste->image; ?>" class="img-carousel d-block" alt="<?= $poste->titre; ?>" loading="lazy" />
+                <?php if ($poste->getImage()) : ?>
+                    <img src="/images/poste/<?= $poste->getImage(); ?>" class="img-carousel d-block" alt="<?= $poste->getTitre(); ?>" loading="lazy" />
                 <?php else : ?>
                     <img src="https://fakeimg.pl/1200x600" class="img-carousel d-block w-100">
                 <?php endif; ?>
                 <div class="carousel-caption d-none d-md-block">
-                    <h2><?= $poste->titre; ?></h2>
-                    <p><?= strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description; ?></p>
-                    <a href="/postes/details/<?= $poste->id ?>" class="btn btn-primary">En savoir plus</a>
+                    <h2><?= $poste->getTitre(); ?></h2>
+                    <p><?= strlen($poste->getDescription()) > 150 ? substr($poste->getDescription(), 0, 150) . '...' : $poste->getDescription(); ?></p>
+                    <a href="/postes/details/<?= $poste->getId() ?>" class="btn btn-primary">En savoir plus</a>
                 </div>
             </div>
         <?php endforeach; ?>

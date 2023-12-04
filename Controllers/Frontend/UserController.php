@@ -15,7 +15,7 @@ class UserController extends Controller
      * @return void
      */
     #[Route('user.register', '/register', ['GET', 'POST'])]
-    public function register(): void
+    public function register(): string
     {
         $form = new RegisterForm();
 
@@ -37,23 +37,22 @@ class UserController extends Controller
                         ->setPassword($pass)
                         ->create();
 
-                    $_SESSION['message'] = "Vous êtes bien inscrit à notre application";
+                    $this->addFlash('success', "Vous êtes bien inscrit à notre application");
 
-                    header('Location: /login');
-                    exit();
+                    return $this->redirect('login');
                 } else {
-                    $_SESSION['error'] = "L'email existe déjà";
+                    $this->addFlash('danger', "L'email existe déjà");
                 }
             } else {
-                $_SESSION['error'] = "L'email n'est pas valide";
+                $this->addFlash('danger', "L'email n'est pas valide");
             }
-        } else {
-            $_SESSION['error'] = !empty($_POST) ? "Le formulaire est incomplet" : '';
+        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->addFlash('danger', "Le formulaire est incomplet");
             $email = (isset($_POST['email'])) ? strip_tags($_POST['email']) : '';
             $nom = (isset($_POST['nom'])) ? strip_tags($_POST['nom']) : '';
             $prenom = (isset($_POST['prenom'])) ? strip_tags($_POST['prenom']) : '';
         }
 
-        $this->render('users/register', 'base', ['registerForm' => $form->create()]);
+        return $this->render('users/register', 'base', ['registerForm' => $form->create()]);
     }
 }

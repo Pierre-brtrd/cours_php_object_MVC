@@ -39,7 +39,9 @@ class PosteModel extends Model
      */
     public function findActiveWithLimit(int $max): mixed
     {
-        return $this->runQuery("SELECT * FROM $this->table WHERE actif = :active LIMIT :max OFFSET 0", ['active' => true, 'max' => $max])->fetchAll();
+        return $this->fetchHydrate(
+            $this->runQuery("SELECT * FROM $this->table WHERE actif = :active LIMIT :max OFFSET 0", ['active' => true, 'max' => $max])->fetchAll()
+        );
     }
 
     public function findAllWithPagination(int $maxPerPage, int $page = 1, bool $actif = false): array
@@ -147,7 +149,7 @@ class PosteModel extends Model
      *
      * @return DateTime
      */
-    public function getCreatedDAt(): DateTime
+    public function getCreated_at(): DateTime
     {
         return $this->created_at;
     }
@@ -159,9 +161,12 @@ class PosteModel extends Model
      *
      * @return self
      */
-    public function setCreatedDAt(DateTime $createdDAt): self
+    public function setCreated_at(null|DateTime|string $createdAt): self
     {
-        $this->created_at = $createdDAt;
+        if (is_string($createdAt)) {
+            $createdAt = new \DateTime($createdAt);
+        }
+        $this->created_at = $createdAt;
 
         return $this;
     }

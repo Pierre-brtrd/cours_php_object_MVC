@@ -16,9 +16,9 @@ class MainController extends Controller
      * @return void
      */
     #[Route('homepage', '/', ['GET'])]
-    public function index(): void
+    public function index(): string
     {
-        $this->render('main/index', 'base', [
+        return $this->render('main/index', 'base', [
             'meta' => [
                 'title' => 'Homepage',
                 'og:title' => 'Homepage | My App PHP Object',
@@ -35,7 +35,7 @@ class MainController extends Controller
      * @return void
      */
     #[Route('login', '/login', ['GET', 'POST'])]
-    public function login(): void
+    public function login(): string
     {
         $form = new LoginForm();
 
@@ -48,9 +48,9 @@ class MainController extends Controller
             // Si l'utilisateur n'existe pas
             if (!$user) {
                 // On envoi un message de session erreur
-                $_SESSION['error'] = "L'adresse email et/ou le mot de passe est incorrect";
-                header('Location: /login');
-                exit();
+                $this->addFlash('danger', "L'adresse email et/ou le mot de passe est incorrect");
+
+                return $this->redirect('login');
             }
 
             // L'utilisateur existe
@@ -65,16 +65,16 @@ class MainController extends Controller
                 // Le mot de passe est bon
                 // On crée la session
                 $user->setSession();
-                header('Location: /');
-                exit();
+
+                return $this->redirect('homepage');
             } else {
-                $_SESSION['error'] = "L'adresse email et/ou le mot de passe est incorrect";
-                header('Location: /login');
-                exit();
+                $this->addFlash('danger', "L'adresse email et/ou le mot de passe est incorrect");
+
+                return $this->redirect('login');
             }
         }
 
-        $this->render('users/login', 'base', [
+        return $this->render('users/login', 'base', [
             'meta' => [
                 'title' => 'Se connecter',
                 'description' => 'Connectez vous à votre compte pour retrouver votre profil, gérer vos postes et vos informations',
@@ -100,9 +100,9 @@ class MainController extends Controller
         exit();
     }
 
-    public function error(int $statusCode): void
+    public function error(int $statusCode): string
     {
-        $this->render('error/error', 'base', [
+        return $this->render('error/error', 'base', [
             'code' => $statusCode,
             'meta' => [
                 'title' => "Erreur $statusCode",

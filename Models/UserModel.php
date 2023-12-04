@@ -43,6 +43,17 @@ class UserModel extends Model
         ];
     }
 
+    public function isAuthor(): bool
+    {
+        $query = $this->runQuery("SELECT * FROM $this->table JOIN poste p ON $this->table.id = p.userId WHERE $this->table.id = ?", [$this->id])->fetch();
+
+        if ($query) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Get the value of id
      *

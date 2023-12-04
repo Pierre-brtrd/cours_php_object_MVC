@@ -28,9 +28,9 @@ class Model extends Db
      */
     public function findAll(): array
     {
-        $query = $this->runQuery("SELECT * FROM $this->table");
-
-        return $query->fetchAll();
+        return $this->fetchHydrate(
+            $this->runQuery("SELECT * FROM $this->table")->fetchAll()
+        );
     }
 
     /**
@@ -41,7 +41,9 @@ class Model extends Db
      */
     public function find(int $id): object|bool
     {
-        return $this->runQuery("SELECT * FROM $this->table WHERE id = :id", ['id' => $id])->fetch();
+        return $this->fetchHydrate(
+            $this->runQuery("SELECT * FROM $this->table WHERE id = :id", ['id' => $id])->fetch()
+        );
     }
 
     /**
@@ -248,12 +250,8 @@ class Model extends Db
         foreach ($donnees as $key => $valeur) {
             // On récupère les setters
             $setter = 'set' . ucfirst($key);
-
-            // On vérifie que la méthode existe
-            if (method_exists($this, $setter)) {
-                // $this->setTitre('Test')
-                $this->$setter($valeur);
-            }
+            // $this->setTitre('Test')
+            $this->$setter($valeur);
         }
 
         return $this;
@@ -281,6 +279,21 @@ class Model extends Db
         } else {
             // Requête simple (sans marqueur SQL)
             return $this->database->query($sql);
+        }
+    }
+
+    protected function fetchHydrate(mixed $query): array|static|bool
+    {
+        if (is_array($query) && count($query) > 1) {
+            $data = array_map(function (mixed $value) {
+                return (new static)->hydrate($value);
+            }, $query);
+
+            return $data;
+        } elseif (!empty($query)) {
+            return (new static)->hydrate($query);
+        } else {
+            return $query;
         }
     }
 }

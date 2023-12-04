@@ -9,12 +9,12 @@ use App\Models\UserModel;
 class AdminController extends Controller
 {
     #[Route('admin.index', '/admin', ['GET'])]
-    public function index(): void
+    public function index(): string
     {
         // On vérifie si l'utilisateur est admin
         $this->isAdmin();
 
-        $this->render('admin/index', 'admin', [
+        return $this->render('admin/index', 'admin', [
             'meta' => [
                 'title' => 'Administration du site',
                 'description' => 'Gérez le site, retrouvez la liste des utilisateurs ainsi que la liste des postes pour les gérer',

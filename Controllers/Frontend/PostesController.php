@@ -21,13 +21,13 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('poste.index', '/postes(\?page=\d+)?', ['GET'])]
-    public function index(?string $page = null): void
+    public function index(?string $page = null): string
     {
         $page = preg_match('/\d+/', $page ?: '', $matches) ? (int) $matches[0] : 1;
 
         $postes = $this->posteModel->findAllWithPagination(6, $page, true);
 
-        $this->render('postes/Index/index', 'base', [
+        return $this->render('postes/Index/index', 'base', [
             'meta' => [
                 'title' => 'Liste des postes',
                 'og:title' => 'Liste des postes | My app PHP Object',
@@ -47,19 +47,18 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('poste.show', '/postes/details/([0-9]+)', ['GET'])]
-    public function details(int $id): void
+    public function details(int $id): string
     {
         // On recherche une annonce
         $poste = $this->posteModel->findOneActiveWithAuthor($id);
 
         if (!$poste) {
-            $_SESSION['error'] = "Poste non trouvé";
+            $this->addFlash('danger', "Poste non trouvé");
 
-            header("Location: /postes");
-            exit;
+            return $this->redirect('poste.index');
         }
 
-        $this->render('postes/Show/show', 'base', [
+        return $this->render('postes/Show/show', 'base', [
             'meta' => [
                 'title' => $poste->titre,
                 'og:title' => "$poste->titre | My app PHP Object",
@@ -82,19 +81,18 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('poste.show', '/postes/auteur/([0-9]+)', ['GET'])]
-    public function auteur(int $id): void
+    public function auteur(int $id): string
     {
         $postes = $this->posteModel->findBy(['userId' => $id]);
         $auteur = $this->userModel->find($id);
 
         if (!$postes) {
-            $_SESSION['error'] = "Poste non trouvé";
+            $this->addFlash('danger', "Poste non trouvé");
 
-            header("Location: /postes");
-            exit;
+            return $this->redirect('poste.index');
         }
 
-        $this->render('Postes/auteur', 'base', [
+        return $this->render('Postes/auteur', 'base', [
             'meta' => [
                 'title' => "Liste des poste de $auteur->prenom $auteur->nom",
                 'og:title' => "Liste des poste de $auteur->prenom $auteur->nom | My app PHP Object",

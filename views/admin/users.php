@@ -13,20 +13,20 @@
             <tbody>
                 <?php foreach ($users as $user) : ?>
                     <tr>
-                        <td><?= $user->id; ?></td>
-                        <td><?= $user->nom; ?></td>
-                        <td><?= $user->prenom; ?></td>
-                        <td><?= $user->email; ?></td>
-                        <td><?= $user->roles; ?></td>
+                        <td><?= $user->getId(); ?></td>
+                        <td><?= $user->getNom(); ?></td>
+                        <td><?= $user->getPrenom(); ?></td>
+                        <td><?= $user->getEmail(); ?></td>
+                        <td><?= implode(', ', $user->getRoles()) ?></td>
                         <td>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <a href="/admin/user/edit/<?= $user->id; ?>" class="btn btn-warning">Modifier</a>
+                                    <a href="/admin/user/edit/<?= $user->getId(); ?>" class="btn btn-warning">Modifier</a>
                                 </div>
                                 <div class="col-md-6">
                                     <form action="/admin/deleteUser" method="POST" onsubmit="return confirm('Êtes-vous vraiment sûr de vouloir supprimer ce poste ?')">
                                         <input type="hidden" name="token" value="<?= $token; ?>">
-                                        <input type="hidden" name="id" value="<?= $user->id; ?>">
+                                        <input type="hidden" name="id" value="<?= $user->getId(); ?>">
                                         <button type="submit" class="btn btn-danger">Supprimer</a>
                                     </form>
                                 </div>

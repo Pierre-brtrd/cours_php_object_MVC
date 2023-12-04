@@ -40,4 +40,14 @@ class Router
 
         $controller->error(404);
     }
+
+    public function getUrl(string $route): string
+    {
+        $route = array_filter($_SESSION['routes'], function ($value) use ($route) {
+            return $value['name'] === $route;
+        });
+        $route = array_shift($route);
+
+        return $route['url'];
+    }
 }

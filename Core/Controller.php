@@ -4,7 +4,7 @@ namespace App\Core;
 
 abstract class Controller
 {
-    public function render(string $file, string $template = 'base', array $data = [])
+    public function render(string $file, string $template = 'base', array $data = []): string
     {
         // On extrait le contenu de $data
         extract($data);
@@ -18,7 +18,7 @@ abstract class Controller
         $contenu = ob_get_clean();
 
         // Template de page
-        require_once ROOT . '/Views/' . $template . '.php';
+        return require_once ROOT . '/Views/' . $template . '.php';
     }
 
     protected function isAdmin()
@@ -34,5 +34,18 @@ abstract class Controller
             header('Location: /login');
             exit;
         }
+    }
+
+    protected function addFlash(string $type, string $message): void
+    {
+        $_SESSION['message'][$type] = $message;
+    }
+
+    protected function redirect(string $route): string
+    {
+        $router = new Router();
+
+        header('Location: ' . $router->getUrl($route));
+        exit();
     }
 }
