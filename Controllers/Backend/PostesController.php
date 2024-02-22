@@ -2,11 +2,11 @@
 
 namespace App\Controllers\Backend;
 
+use App\Core\Controller;
 use App\Core\Route;
 use App\Form\PosteForm;
-use App\Core\Controller;
-use App\Models\UserModel;
 use App\Models\PosteModel;
+use App\Models\UserModel;
 
 class PostesController extends Controller
 {
@@ -51,7 +51,7 @@ class PostesController extends Controller
         // On vérifie si le formulaire est complet
 
         // Instance du formulaire
-        $form = new PosteForm();
+        $form = new PosteForm($_SERVER['REQUEST_URI']);
 
         // Validation du form
         if ($form->validate($_POST, ['titre', 'description'])) {
@@ -71,7 +71,7 @@ class PostesController extends Controller
 
             $this->addFlash('success', 'Article créé avec succès');
 
-            return $this->redirect('admin.poste.index');
+            return $this->redirect('/admin/postes', true);
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->addFlash('danger', 'Le formulaire est incomplet');
 
@@ -87,8 +87,6 @@ class PostesController extends Controller
             'form' => $form->create()
         ]);
     }
-
-
 
     /**
      * Modifier un poste
@@ -116,7 +114,7 @@ class PostesController extends Controller
         }
 
         // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
-        if ($poste->userId != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
+        if ($poste->getUserId() != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
             $this->addFlash('danger', 'Vous n\'avez pas accès à ce poste');
 
             return $this->redirect('poste.index');
@@ -126,19 +124,19 @@ class PostesController extends Controller
 
         foreach ($this->userModel->findAll() as $user) {
 
-            if ($user->id == $poste->userId) {
-                $userArr["$user->prenom $user->nom"] = [
-                    'value' => $user->id,
+            if ($user->getId() == $poste->getUserId()) {
+                $userArr["{$user->getPrenom()} {$user->getNom()}"] = [
+                    'value' => $user->getId(),
                     'selected' => true,
                 ];
             } else {
-                $userArr["$user->prenom $user->nom"] = [
-                    'value' => $user->id,
+                $userArr["{$user->getPrenom()} {$user->getNom()}"] = [
+                    'value' => $user->getId(),
                 ];
             }
         }
 
-        $form = new PosteForm($this->posteModel->hydrate($poste));
+        $form = new PosteForm($_SERVER['REQUEST_URI'], $poste);
 
         // On traire le formulaire
         if ($form->validate($_POST, ['titre', 'description'])) {
@@ -149,7 +147,7 @@ class PostesController extends Controller
 
             // On instancie le model
             $posteUpdate = $this->posteModel
-                ->setId($poste->id)
+                ->setId($poste->getId())
                 ->setTitre($titre)
                 ->setDescription($description)
                 ->setImage($_FILES['image']);
@@ -172,7 +170,7 @@ class PostesController extends Controller
         // On envoie à la vue
         return $this->render('postes/modifier', 'base', [
             'meta' => [
-                'title' => "Modifier le poste $poste->titre",
+                'title' => "Modifier le poste {$poste->getTitre()}",
                 'description' => 'Modifiez un poste et proposez une offre d\'emploi pour trouver de bon profil',
             ],
             'form' => $form->create()
@@ -193,9 +191,7 @@ class PostesController extends Controller
         $poste = $this->posteModel->find(!empty($_POST['id']) ? $_POST['id'] : 0);
 
         if (hash_equals($_POST['token'], $_SESSION['token']) && $poste) {
-            $this->posteModel
-                ->hydrate($poste)
-                ->delete();
+            $poste->delete();
 
             $this->addFlash('success', 'Poste supprimé avec succès');
         } else {
@@ -230,8 +226,6 @@ class PostesController extends Controller
 
             return;
         }
-
-        $poste = $this->posteModel->hydrate($poste);
 
         /** @var PosteModel $poste */
         $poste

@@ -982,7 +982,7 @@ Ces 5 dossiers sont la base du MVC, chaque dossier aura les fichiers corresponda
 
 Vous devez pour le moment avoir cette architecture sur votre projet :
 
-![image-20220425141307604](/Users/pierre/Library/Application Support/typora-user-images/image-20220425141307604.png)
+![archi-dossier](./public/images/archi-dossier.png)
 
 Maintenant que nos fichiers sont créés, nous allons devoir réorganiser les fichiers que nous avons déjà mis en place.
 

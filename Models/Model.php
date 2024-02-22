@@ -182,7 +182,7 @@ class Model extends Db
     public function delete(): ?\PDOStatement
     {
         /** @var UserModel|PosteModel $this */
-        if (isset($this->image)) {
+        if (isset($this->image) && !empty($this->image)) {
             $this->removeImage(ROOT . "/public/images/$this->table/" . $this->image);
         }
 
@@ -206,8 +206,8 @@ class Model extends Db
 
                     move_uploaded_file($image['tmp_name'], ROOT . '/public/images/' . $this->table . '/' . $nom);
 
-                    if ($remove) {
-                        /** @var PosteModel $this */
+                    /** @var PosteModel $this */
+                    if ($remove && isset($this->image) && !empty($this->image)) {
                         $this->removeImage(ROOT . '/public/images/' . $this->table . '/' . $this->image);
                     }
 
@@ -260,6 +260,27 @@ class Model extends Db
     }
 
     /**
+     * Fonction pour hydater automatiquement le retour d'une requête en BDD
+     *
+     * @param mixed $query
+     * @return array|static|boolean
+     */
+    protected function fetchHydrate(mixed $query): array|static|bool
+    {
+        if (is_array($query) && count($query) > 1) {
+            $data = array_map(function (mixed $value) {
+                return (new static)->hydrate($value);
+            }, $query);
+
+            return $data;
+        } elseif (!empty($query)) {
+            return (new static)->hydrate($query);
+        } else {
+            return $query;
+        }
+    }
+
+    /**
      * Fonction pour envoyer n'importe qu'elle requête SQL en BDD
      *
      * @param string $sql Requête SQL à envoyer
@@ -281,21 +302,6 @@ class Model extends Db
         } else {
             // Requête simple (sans marqueur SQL)
             return $this->database->query($sql);
-        }
-    }
-
-    protected function fetchHydrate(mixed $query): array|static|bool
-    {
-        if (is_array($query) && count($query) > 1) {
-            $data = array_map(function (mixed $value) {
-                return (new static)->hydrate($value);
-            }, $query);
-
-            return $data;
-        } elseif (!empty($query)) {
-            return (new static)->hydrate($query);
-        } else {
-            return $query;
         }
     }
 }

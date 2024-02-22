@@ -5,7 +5,8 @@ namespace App\Core;
 class Main
 {
     public function __construct(
-        private Router $router = new Router
+        private Router $router = new Router,
+        private Cache $cache = new Cache
     ) {
     }
 
@@ -36,40 +37,45 @@ class Main
 
     private function initRouter(): void
     {
-        $files = glob(\dirname(__DIR__) . '/Controllers/*.php');
+        $cachedRoutes = $this->cache->get('routes');
 
-        $files = array_merge_recursive(glob(\dirname(__DIR__) . '/Controllers/**/*.php', GLOB_BRACE), $files);
+        if ($cachedRoutes === null) {
+            $files = glob(\dirname(__DIR__) . '/Controllers/*.php');
 
-        foreach ($files as $file) {
-            $classes[] = $this->convertFileToNamespace($file);
-        }
+            $files = array_merge_recursive(glob(\dirname(__DIR__) . '/Controllers/**/*.php', GLOB_BRACE), $files);
 
-        unset($_SESSION['routes']);
+            foreach ($files as $file) {
+                $classes[] = $this->convertFileToNamespace($file);
+            }
 
-        foreach ($classes as $class) {
-            $methods = get_class_methods($class);
-            foreach ($methods as $method) {
-                $attributes = (new \ReflectionMethod($class, $method))->getAttributes(Route::class);
-                foreach ($attributes as $attribute) {
-                    if ($attribute) {
-                        $route = $attribute->newInstance();
-                        $route->setController($class);
-                        $route->setAction($method);
-                        $routeArr = [
-                            'name' => $route->getName(),
-                            'url' => $route->getUrl(),
-                            'methods' => $route->getMethods(),
-                            'controller' => $route->getController(),
-                            'action' => $route->getAction(),
-                        ];
+            foreach ($classes as $class) {
+                $methods = get_class_methods($class);
+                foreach ($methods as $method) {
+                    $attributes = (new \ReflectionMethod($class, $method))->getAttributes(Route::class);
+                    foreach ($attributes as $attribute) {
+                        if ($attribute) {
+                            $route = $attribute->newInstance();
+                            $route->setController($class);
+                            $route->setAction($method);
+                            $routeArr = [
+                                'name' => $route->getName(),
+                                'url' => $route->getUrl(),
+                                'methods' => $route->getMethods(),
+                                'controller' => $route->getController(),
+                                'action' => $route->getAction(),
+                            ];
 
-                        $this->router->addRoute($routeArr);
-
-                        $_SESSION['routes'][] = $routeArr;
+                            $routes[] = $routeArr;
+                        }
                     }
                 }
             }
+            $this->cache->set('routes', $routes);
+        } else {
+            $routes = $cachedRoutes;
         }
+
+        $this->router->setRoutes($routes);
     }
 
     private function convertFileToNamespace(string $file): string

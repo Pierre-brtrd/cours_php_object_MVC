@@ -7,10 +7,10 @@ use App\Models\PosteModel;
 
 class PosteForm extends Form
 {
-    public function __construct(?PosteModel $poste = null)
+    public function __construct(string $action, ?PosteModel $poste = null)
     {
         $this
-            ->startForm('POST', '#', [
+            ->startForm('POST', $action, [
                 'class' => 'form card p-3 w-75 mx-auto',
                 'enctype' => 'multipart/form-data',
             ])

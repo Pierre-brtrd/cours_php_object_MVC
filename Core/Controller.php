@@ -41,11 +41,10 @@ abstract class Controller
         $_SESSION['message'][$type] = $message;
     }
 
-    protected function redirect(string $route): string
+    protected function redirect(string $route, bool $url = false): void
     {
-        $router = new Router();
-
-        header('Location: ' . $router->getUrl($route));
+        $path = $url ?  $route : Router::getUrl($route);
+        header('Location: ' . $path);
         exit();
     }
 }

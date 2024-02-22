@@ -4,7 +4,6 @@ namespace App\Controllers\Backend;
 
 use App\Core\Route;
 use App\Core\Controller;
-use App\Models\UserModel;
 
 class AdminController extends Controller
 {

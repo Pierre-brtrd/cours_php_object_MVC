@@ -20,6 +20,13 @@ class Router
         return $this;
     }
 
+    public function setRoutes(array $routes): self
+    {
+        $this->routes = $routes;
+
+        return $this;
+    }
+
     public function handleRequest($url, $method)
     {
         foreach ($this->routes as $route) {
@@ -41,9 +48,11 @@ class Router
         $controller->error(404);
     }
 
-    public function getUrl(string $route): string
+    public static function getUrl(string $route): string
     {
-        $route = array_filter($_SESSION['routes'], function ($value) use ($route) {
+        $cache = new Cache();
+
+        $route = array_filter($cache->get('routes'), function ($value) use ($route) {
             return $value['name'] === $route;
         });
         $route = array_shift($route);
