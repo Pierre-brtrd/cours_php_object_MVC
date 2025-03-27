@@ -20,9 +20,9 @@ class UserModel extends Model
      * Cherche un utilisateur par son email
      *
      * @param string $email
-     * @return mixed
+     * @return static|bool
      */
-    public function findOneByEmail(string $email): mixed
+    public function findOneByEmail(string $email): static|bool
     {
         return $this->fetchHydrate(
             $this->runQuery("SELECT * FROM $this->table WHERE email = ?", [$email])->fetch()
@@ -126,6 +126,11 @@ class UserModel extends Model
         $this->prenom = $prenom;
 
         return $this;
+    }
+
+    public function getFullName(): string
+    {
+        return "$this->prenom $this->nom";
     }
 
     /**

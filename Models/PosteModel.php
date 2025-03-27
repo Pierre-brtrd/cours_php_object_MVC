@@ -16,6 +16,7 @@ class PosteModel extends Model
         protected ?Datetime $created_at = null,
         protected ?bool $actif = null,
         protected ?int $userId = null,
+        protected ?UserModel $user = null,
         protected ?string $image = null
     ) {
         $this->table = 'poste';
@@ -24,9 +25,9 @@ class PosteModel extends Model
     /**
      * Cherche les postes avec les auteurs
      *
-     * @return mixed
+     * @return array
      */
-    public function findActiveWithAuthor(): mixed
+    public function findActiveWithAuthor(): array
     {
         return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.userId = u.id WHERE actif = ?", [true])->fetchAll();
     }
@@ -35,9 +36,9 @@ class PosteModel extends Model
      * Chercher tous les articles actifs avec une limite
      *
      * @param integer $max
-     * @return mixed
+     * @return array
      */
-    public function findActiveWithLimit(int $max): mixed
+    public function findActiveWithLimit(int $max): array
     {
         return $this->fetchHydrate(
             $this->runQuery("SELECT * FROM $this->table WHERE actif = :active LIMIT :max OFFSET 0", ['active' => true, 'max' => $max])->fetchAll()
@@ -66,11 +67,13 @@ class PosteModel extends Model
      * Cherche un article avec l'auteur
      *
      * @param integer $id
-     * @return mixed
+     * @return static|bool
      */
-    public function findOneActiveWithAuthor(int $id): mixed
+    public function findOneActiveWithAuthor(int $id): static|bool
     {
-        return $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.userId = u.id WHERE p.id = ? AND p.actif = ?", [$id, true])->fetch();
+        return $this->fetchHydrate(
+            $this->runQuery("SELECT p.*, u.nom, u.prenom, u.email  FROM $this->table p INNER JOIN user u ON p.userId = u.id WHERE p.id = ? AND p.actif = ?", [$id, true])->fetch()
+        );
     }
 
     /**
@@ -217,6 +220,18 @@ class PosteModel extends Model
         $this->userId = $userId;
 
         return $this;
+    }
+
+    public function getUser(): ?UserModel
+    {
+        if (!$this->user && $this->userId) {
+            /** @var ?UserModel */
+            $user = (new UserModel)->find($this->userId);
+
+            $this->user = $user;
+        }
+
+        return $this->user;
     }
 
     /**

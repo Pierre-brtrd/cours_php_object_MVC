@@ -2,10 +2,11 @@
 
 namespace App\Controllers\Frontend;
 
-use App\Core\Route;
 use App\Core\Controller;
-use App\Models\UserModel;
+use App\Core\Response;
+use App\Core\Route;
 use App\Form\RegisterForm;
+use App\Models\UserModel;
 
 class UserController extends Controller
 {
@@ -15,7 +16,7 @@ class UserController extends Controller
      * @return void
      */
     #[Route('user.register', '/register', ['GET', 'POST'])]
-    public function register(): string
+    public function register(): Response
     {
         $form = new RegisterForm();
 
@@ -48,9 +49,9 @@ class UserController extends Controller
             }
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->addFlash('danger', "Le formulaire est incomplet");
-            $email = (isset($_POST['email'])) ? strip_tags($_POST['email']) : '';
-            $nom = (isset($_POST['nom'])) ? strip_tags($_POST['nom']) : '';
-            $prenom = (isset($_POST['prenom'])) ? strip_tags($_POST['prenom']) : '';
+            $email = isset($_POST['email']) ? strip_tags($_POST['email']) : '';
+            $nom = isset($_POST['nom']) ? strip_tags($_POST['nom']) : '';
+            $prenom = isset($_POST['prenom']) ? strip_tags($_POST['prenom']) : '';
         }
 
         return $this->render('users/register', 'base', ['registerForm' => $form->create()]);

@@ -6,7 +6,7 @@
                 <?php include_once '_info.php'; ?>
             </div>
             <div class="col-md-9">
-                <p><?= $poste->description; ?></p>
+                <p><?= $poste->getDescription(); ?></p>
             </div>
         </div>
     </div>

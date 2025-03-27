@@ -77,3 +77,8 @@
     height: 200px;
     object-fit: cover;
 }
+
+.card-img-top {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+}

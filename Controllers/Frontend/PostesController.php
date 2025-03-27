@@ -2,10 +2,11 @@
 
 namespace App\Controllers\Frontend;
 
-use App\Core\Route;
 use App\Core\Controller;
-use App\Models\UserModel;
+use App\Core\Response;
+use App\Core\Route;
 use App\Models\PosteModel;
+use App\Models\UserModel;
 
 class PostesController extends Controller
 {
@@ -20,8 +21,8 @@ class PostesController extends Controller
      *
      * @return void
      */
-    #[Route('poste.index', '/postes(\?page=\d+)?', ['GET'])]
-    public function index(?string $page = null): string
+    #[Route('poste.index', '/postes(?:\?page=(?P<page>\d+))?', ['GET'])]
+    public function index(?string $page = null): Response
     {
         $page = preg_match('/\d+/', $page ?: '', $matches) ? (int) $matches[0] : 1;
 
@@ -46,8 +47,8 @@ class PostesController extends Controller
      * @param integer $id
      * @return void
      */
-    #[Route('poste.show', '/postes/details/([0-9]+)', ['GET'])]
-    public function details(int $id): string
+    #[Route('poste.show', '/postes/details/(?P<id>\d+)', ['GET'])]
+    public function details(int $id): Response
     {
         // On recherche une annonce
         $poste = $this->posteModel->findOneActiveWithAuthor($id);
@@ -60,14 +61,14 @@ class PostesController extends Controller
 
         return $this->render('postes/Show/show', 'base', [
             'meta' => [
-                'title' => $poste->titre,
-                'og:title' => "$poste->titre | My app PHP Object",
-                'twitter:title' => "$poste->titre | My app PHP Object",
-                'description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
-                'og:description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
-                'twitter:description' => strlen($poste->description) > 150 ? substr($poste->description, 0, 150) . '...' : $poste->description,
-                'og:image' => $poste->image ? "https://$_SERVER[HTTP_HOST]/uploads/postes/$poste->image" : null,
-                'twitter:image' => $poste->image ? "https://$_SERVER[HTTP_HOST]/uploads/postes/$poste->image" : null,
+                'title' => $poste->getTitre(),
+                'og:title' => "{$poste->getTitre()} | My app PHP Object",
+                'twitter:title' => "{$poste->getTitre()} | My app PHP Object",
+                'description' => strlen($poste->getDescription()) > 150 ? substr($poste->getDescription(), 0, 150) . '...' : $poste->getDescription(),
+                'og:description' => strlen($poste->getDescription()) > 150 ? substr($poste->getDescription(), 0, 150) . '...' : $poste->getDescription(),
+                'twitter:description' => strlen($poste->getDescription()) > 150 ? substr($poste->getDescription(), 0, 150) . '...' : $poste->getDescription(),
+                'og:image' => $poste->getImage() ? "https://$_SERVER[HTTP_HOST]/uploads/postes/{$poste->getImage()}" : null,
+                'twitter:image' => $poste->getImage() ? "https://$_SERVER[HTTP_HOST]/uploads/postes/{$poste->getImage()}" : null,
                 'twitter:card' => 'summary',
             ],
             'poste' => $poste
@@ -80,8 +81,8 @@ class PostesController extends Controller
      * @param integer $id
      * @return void
      */
-    #[Route('poste.show', '/postes/auteur/([0-9]+)', ['GET'])]
-    public function auteur(int $id): string
+    #[Route('poste.show', '/postes/auteur/(?P<id>\d+)', ['GET'])]
+    public function auteur(int $id): Response
     {
         $postes = $this->posteModel->findBy(['userId' => $id]);
         $auteur = $this->userModel->find($id);

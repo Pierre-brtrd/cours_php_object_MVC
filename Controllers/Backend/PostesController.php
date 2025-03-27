@@ -3,6 +3,7 @@
 namespace App\Controllers\Backend;
 
 use App\Core\Controller;
+use App\Core\Response;
 use App\Core\Route;
 use App\Form\PosteForm;
 use App\Models\PosteModel;
@@ -16,8 +17,8 @@ class PostesController extends Controller
     ) {
     }
 
-    #[Route('admin.poste.index', '/admin/postes(\?page=\d+)?', ['GET'])]
-    public function postes(?string $page = null): string
+    #[Route('admin.poste.index', '/admin/postes(?:\?page=(?P<page>\d+))?', ['GET'])]
+    public function postes(?string $page = null): Response
     {
         $this->isAdmin();
 
@@ -32,7 +33,7 @@ class PostesController extends Controller
             'postes' => $postes['postes'],
             'token' => $_SESSION['token'] = bin2hex(random_bytes(35)),
             'page' => $page,
-            'totalPage' =>  $postes['pages'],
+            'totalPage' => $postes['pages'],
             'admin' => true,
         ]);
     }
@@ -43,7 +44,7 @@ class PostesController extends Controller
      * @return void
      */
     #[Route('admin.poste.create', '/admin/poste/create', ['GET', 'POST'])]
-    public function ajouter(): string
+    public function ajouter(): Response
     {
         // On vérifie si l'utilisateur est connecté
         $this->isAdmin();
@@ -71,12 +72,12 @@ class PostesController extends Controller
 
             $this->addFlash('success', 'Article créé avec succès');
 
-            return $this->redirect('/admin/postes', true);
+            return $this->redirect('admin.poste.index');
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->addFlash('danger', 'Le formulaire est incomplet');
 
-            $titre = (isset($_POST['titre'])) ? strip_tags($_POST['titre']) : '';
-            $description = (isset($_POST['description'])) ? strip_tags($_POST['description']) : '';
+            $titre = isset($_POST['titre']) ? strip_tags($_POST['titre']) : '';
+            $description = isset($_POST['description']) ? strip_tags($_POST['description']) : '';
         }
 
         return $this->render('postes/ajouter', 'base', [
@@ -94,8 +95,8 @@ class PostesController extends Controller
      * @param integer $id
      * @return void
      */
-    #[Route('admin.poste.edit', '/admin/poste/edit/([0-9]+)', ['GET', 'POST'])]
-    public function modifier(string|int $id): string
+    #[Route('admin.poste.edit', '/admin/poste/edit/(?P<id>\d+)', ['GET', 'POST'])]
+    public function modifier(string|int $id): Response
     {
         // On vérifie si l'utilisateur est connecté
         $this->isAdmin();
@@ -103,21 +104,21 @@ class PostesController extends Controller
         // On instancie le model
 
         // On cherche le poste avec l'id
+        /** @var ?PosteModel $poste */
         $poste = is_numeric($id) ? $this->posteModel->find($id) : null;
 
         // Si l'annonce n'existe pas, on redirige sur la liste des annonces
         if (!$poste) {
-            http_response_code(404);
             $this->addFlash('danger', "Le poste recherché n'existe pas");
 
-            return $this->redirect('poste.index');
+            return $this->redirect('admin.poste.index');
         }
 
         // On vérifie que le poste appartient à l'utilisateur connecté OU user Admin
         if ($poste->getUserId() != $_SESSION['user']['id'] && !in_array("ROLE_ADMIN", $_SESSION['user']['roles'])) {
             $this->addFlash('danger', 'Vous n\'avez pas accès à ce poste');
 
-            return $this->redirect('poste.index');
+            return $this->redirect('admin.poste.index');
         }
 
         $userArr = [];
@@ -163,8 +164,8 @@ class PostesController extends Controller
             return $this->redirect('admin.poste.index');
         } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->addFlash('danger', 'Le formulaire est incomplet');
-            $titre = (isset($_POST['titre'])) ? strip_tags($_POST['titre']) : '';
-            $description = (isset($_POST['description'])) ? strip_tags($_POST['description']) : '';
+            $titre = isset($_POST['titre']) ? strip_tags($_POST['titre']) : '';
+            $description = isset($_POST['description']) ? strip_tags($_POST['description']) : '';
         }
 
         // On envoie à la vue
@@ -183,8 +184,8 @@ class PostesController extends Controller
      *
      * @return void
      */
-    #[Route('admin.postes.delete', '/admin/deletePoste', ['POST'])]
-    public function deletePoste(): void
+    #[Route('admin.postes.delete', '/admin/poste/deletePoste', ['POST'])]
+    public function deletePoste(): Response
     {
         $this->isAdmin();
 
@@ -198,33 +199,31 @@ class PostesController extends Controller
             $this->addFlash('danger', 'Une erreur est survenue');
         }
 
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit();
+        return $this->redirect('admin.poste.index');
     }
 
     /**
      * Active ou désactive un poste
      *
      * @param integer $id
-     * @return void
+     * @return Response
      */
-    #[Route('admin.poste.visibility', '/admin/actifPoste/([0-9]+)',  ['GET'])]
-    public function actifPoste(int $id): void
+    #[Route('admin.poste.visibility', '/admin/actifPoste/(?P<id>\d+)', ['GET'])]
+    public function actifPoste(int $id): Response
     {
         $this->isAdmin();
 
         $poste = $this->posteModel->find($id);
 
         if (!$poste) {
-            http_response_code(404);
-            echo json_encode([
+            $content = json_encode([
                 'data' => [
                     'status' => 'Error',
                     'message' => 'Article non trouvé, veuillez vérifier l\'id',
                 ]
             ]);
 
-            return;
+            return new Response($content, 404);
         }
 
         /** @var PosteModel $poste */
@@ -232,9 +231,7 @@ class PostesController extends Controller
             ->setActif(!$poste->getActif())
             ->update();
 
-        http_response_code(201);
-
-        echo json_encode([
+        $content = json_encode([
             'data' => [
                 'status' => 'Success',
                 'message' => 'Article modifié',
@@ -242,6 +239,6 @@ class PostesController extends Controller
             ]
         ]);
 
-        return;
+        return new Response($content, 201);
     }
 }

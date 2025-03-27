@@ -40,12 +40,12 @@ class Main
         $cachedRoutes = $this->cache->get('routes');
 
         if ($cachedRoutes === null) {
-            $files = glob(\dirname(__DIR__) . '/Controllers/*.php');
-
-            $files = array_merge_recursive(glob(\dirname(__DIR__) . '/Controllers/**/*.php', GLOB_BRACE), $files);
+            $directory = new \RecursiveDirectoryIterator(ROOT . '/Controllers');
+            $iterator = new \RecursiveIteratorIterator($directory);
+            $files = new \RegexIterator($iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
 
             foreach ($files as $file) {
-                $classes[] = $this->convertFileToNamespace($file);
+                $classes[] = $this->convertFileToNamespace($file[0]);
             }
 
             foreach ($classes as $class) {

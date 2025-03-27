@@ -2,11 +2,12 @@
 
 namespace App\Controllers\Frontend;
 
+use App\Core\Controller;
+use App\Core\Response;
 use App\Core\Route;
 use App\Form\LoginForm;
-use App\Core\Controller;
-use App\Models\UserModel;
 use App\Models\PosteModel;
+use App\Models\UserModel;
 
 class MainController extends Controller
 {
@@ -16,7 +17,7 @@ class MainController extends Controller
      * @return void
      */
     #[Route('homepage', '/', ['GET'])]
-    public function index(): string
+    public function index(): Response
     {
         return $this->render('main/index', 'base', [
             'meta' => [
@@ -35,7 +36,7 @@ class MainController extends Controller
      * @return void
      */
     #[Route('login', '/login', ['GET', 'POST'])]
-    public function login(): string
+    public function login(): Response
     {
         $form = new LoginForm();
 
@@ -86,18 +87,17 @@ class MainController extends Controller
      * @return void
      */
     #[Route('logout', '/logout', ['GET'])]
-    public function logout(): void
+    public function logout(): Response
     {
         unset($_SESSION['user']);
 
         $url = (isset($_SERVER['HTTP_REFERER']) && !empty($_SERVER['HTTP_REFERER'])) ?
             $_SERVER['HTTP_REFERER'] : '/';
 
-        header('Location: ' . $url);
-        exit();
+        return $this->redirect($url);
     }
 
-    public function error(int $statusCode): string
+    public function error(int $statusCode): Response
     {
         return $this->render('error/error', 'base', [
             'code' => $statusCode,

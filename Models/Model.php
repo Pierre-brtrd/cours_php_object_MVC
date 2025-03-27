@@ -37,9 +37,9 @@ class Model extends Db
      * Trouve une entrée en BDD de par son ID
      *
      * @param integer $id
-     * @return object|boolean
+     * @return static|boolean
      */
-    public function find(int $id): object|bool
+    public function find(int $id): static|bool
     {
         return $this->fetchHydrate(
             $this->runQuery("SELECT * FROM $this->table WHERE id = :id", ['id' => $id])->fetch()
@@ -86,15 +86,17 @@ class Model extends Db
         $values['limit'] = $maxPerPage;
         $values['offset'] = $offset;
 
-        return $this->runQuery("$sql LIMIT :limit OFFSET :offset", $values)->fetchAll();
+        return $this->fetchHydrate(
+            $this->runQuery("$sql LIMIT :limit OFFSET :offset", $values)->fetchAll()
+        );
     }
 
     /**
      * Fonction de création d'une entrée en BDD
      *
-     * @return \PDOStatement|null
+     * @return PDOStatement|null
      */
-    public function create(): ?\PDOStatement
+    public function create(): ?PDOStatement
     {
         // Requête SQL à faire :
         // INSERT INTO articles (titre, description, created_at, actif) 
@@ -253,7 +255,10 @@ class Model extends Db
             // On récupère les setters
             $setter = 'set' . ucfirst($key);
             // $this->setTitre('Test')
-            $this->$setter($valeur);
+            if (method_exists($this, $setter)) {
+                // On appelle le setter
+                $this->$setter($valeur);
+            }
         }
 
         return $this;
@@ -267,10 +272,12 @@ class Model extends Db
      */
     protected function fetchHydrate(mixed $query): array|static|bool
     {
-        if (is_array($query) && count($query) > 1) {
-            $data = array_map(function (mixed $value) {
-                return (new static)->hydrate($value);
-            }, $query);
+        if (is_array($query) && count($query) > 0) {
+            $data = array_map(
+                fn(mixed $value): static => (new static)->hydrate($value)
+                ,
+                $query
+            );
 
             return $data;
         } elseif (!empty($query)) {

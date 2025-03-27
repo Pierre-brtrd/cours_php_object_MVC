@@ -2,9 +2,10 @@
 
 namespace App\Controllers\Backend;
 
+use App\Core\Controller;
+use App\Core\Response;
 use App\Core\Route;
 use App\Form\UserForm;
-use App\Core\Controller;
 use App\Models\UserModel;
 
 class UserController extends Controller
@@ -20,7 +21,7 @@ class UserController extends Controller
      * @return void
      */
     #[Route('admin.user.index', '/admin/users', ['GET'])]
-    public function user(): string
+    public function user(): Response
     {
         $this->isAdmin();
         // On appelle la vue avec la fonction render en lui passant les données
@@ -33,8 +34,8 @@ class UserController extends Controller
         ]);
     }
 
-    #[Route('admin.user.edit', '/admin/user/edit/([0-9]+)', ['GET', 'POST'])]
-    public function edit(int $id): string
+    #[Route('admin.user.edit', '/admin/user/edit/(?P<id>\d+)', ['GET', 'POST'])]
+    public function edit(int $id): Response
     {
         // On vérifie si l'utilisateur est connecté
         $this->isAdmin();
@@ -42,6 +43,7 @@ class UserController extends Controller
         // On vérifie que l'utilisateur existe dans la BDD
 
         // On cherche l'utilisateur avec l'id
+        /** @var ?UserModel $user */
         $user = $this->userModel->find($id);
 
         // Si l'utilisateur n'existe pas, on redirige sur la liste des annonces
@@ -103,7 +105,7 @@ class UserController extends Controller
      * @return void
      */
     #[Route('admin.user.delete', '/admin/deleteUser', ['POST'])]
-    public function deleteUser(): void
+    public function deleteUser(): Response
     {
         $this->isAdmin();
 
@@ -124,7 +126,6 @@ class UserController extends Controller
             $this->addFlash('danger', "Une erreur est survenue");
         }
 
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit();
+        return $this->redirect('admin.user.index');
     }
 }

@@ -4,24 +4,27 @@ namespace App\Core;
 
 abstract class Controller
 {
-    public function render(string $file, string $template = 'base', array $data = []): string
+    public function render(string $file, string $template = 'base', array $data = []): Response
     {
-        // On extrait le contenu de $data
+        // Extraction des données pour rendre les clés accessibles comme variables dans la vue
         extract($data);
 
-        // On démarre le buffer de sortie (Template Engine) Toute sortie est conservée en mémoire
+        // On démarre le buffer et on inclut la vue
         ob_start();
-        // On charge la vue dans $contenu grâce au buffer de sortie
-        require_once ROOT . '/Views/' . $file . '.php';
-
-        // On transfer le buffer de sortie dans $contenu
+        include ROOT . '/Views/' . $file . '.php';
+        // Le contenu de la vue est capturé dans la variable $contenu
         $contenu = ob_get_clean();
 
-        // Template de page
-        return require_once ROOT . '/Views/' . $template . '.php';
+        // On démarre un nouveau buffer pour le template
+        ob_start();
+        include ROOT . '/Views/' . $template . '.php';
+        // Le contenu final du template (qui utilise $contenu) est capturé
+        $finalContent = ob_get_clean();
+
+        return new Response($finalContent);
     }
 
-    protected function isAdmin()
+    protected function isAdmin(): Response|bool
     {
         // On vérifie si on est connecté et si role Admin pour l'utilisateur
         if (isset($_SESSION['user']) && in_array('ROLE_ADMIN', $_SESSION['user']['roles'])) {
@@ -29,10 +32,9 @@ abstract class Controller
             return true;
         } else {
             // Pas admin, alors redirection vers page de connexion
-            http_response_code(403);
             $_SESSION['error'] = "Vous n'avez pas accès à cette zone, connecté avec un compte Admin";
-            header('Location: /login');
-            exit;
+
+            return $this->redirect('login', 403);
         }
     }
 
@@ -41,10 +43,10 @@ abstract class Controller
         $_SESSION['message'][$type] = $message;
     }
 
-    protected function redirect(string $route, bool $url = false): void
+    protected function redirect(string $route, int $status = 302, array $params = [], bool $url = false): Response
     {
-        $path = $url ?  $route : Router::getUrl($route);
-        header('Location: ' . $path);
-        exit();
+        $path = $url ? $route : Router::getUrl($route, $params);
+
+        return new Response('', $status, ['Location' => $path]);
     }
 }

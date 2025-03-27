@@ -2,13 +2,14 @@
 
 namespace App\Controllers\Backend;
 
-use App\Core\Route;
 use App\Core\Controller;
+use App\Core\Response;
+use App\Core\Route;
 
 class AdminController extends Controller
 {
     #[Route('admin.index', '/admin', ['GET'])]
-    public function index(): string
+    public function index(): Response
     {
         // On vérifie si l'utilisateur est admin
         $this->isAdmin();
